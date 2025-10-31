@@ -139,4 +139,24 @@ type SessionFlashcard struct {
 	Timestamp    time.Time `gorm:"not null"`
 }
 
+// Schedule represents the 'schedules' table for therapy session scheduling.
+type Schedule struct {
+	gorm.Model
+
+	ChildID           uint       `gorm:"not null"`
+	Child             Child      // Belongs-to relationship with Child
+	ActivityID        *uint      // Optional: specific activity scheduled
+	Activity          *Activity  // Belongs-to relationship with Activity
+	ScheduledDate     time.Time  `gorm:"not null"` // Date of the scheduled session
+	ScheduledTime     string     `gorm:"not null"` // Time in HH:MM format
+	DurationMinutes   int        `gorm:"default:60"`
+	Notes             string     // Session notes/description
+	RecurrencePattern string     // "none", "daily", "weekly", "monthly"
+	RecurrenceEndDate *time.Time // End date for recurring schedules
+	IsCompleted       bool       `gorm:"default:false"`
+	CompletedAt       *time.Time // When the scheduled session was completed
+	Reminder          bool       `gorm:"default:true"` // Enable reminder notifications
+	ReminderMinutes   int        `gorm:"default:15"`   // Minutes before session
+}
+
 

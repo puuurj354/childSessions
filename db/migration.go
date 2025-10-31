@@ -57,6 +57,12 @@ func GetAllMigrations() []MigrationInfo {
             Up:          migration005Up,
             Down:        migration005Down,
         },
+        {
+            Version:     "006_create_schedules",
+            Description: "Create schedules table for therapy session scheduling",
+            Up:          migration006Up,
+            Down:        migration006Down,
+        },
     }
 }
 
@@ -403,6 +409,57 @@ func migration005Down(db *gorm.DB) error {
         if err := db.Exec(fmt.Sprintf("DROP INDEX IF EXISTS %s", index)).Error; err != nil {
             return err
         }
+    }
+
+    return nil
+}
+
+// Migration 006: Create schedules table
+func migration006Up(db *gorm.DB) error {
+    // Create schedules table
+    if err := db.AutoMigrate(&model.Schedule{}); err != nil {
+        return err
+    }
+
+    // Add indexes for schedules
+    if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_schedules_child_id ON schedules(child_id)").Error; err != nil {
+        return err
+    }
+    if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_schedules_activity_id ON schedules(activity_id)").Error; err != nil {
+        return err
+    }
+    if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_schedules_scheduled_date ON schedules(scheduled_date)").Error; err != nil {
+        return err
+    }
+    if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_schedules_is_completed ON schedules(is_completed)").Error; err != nil {
+        return err
+    }
+    if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_schedules_deleted_at ON schedules(deleted_at)").Error; err != nil {
+        return err
+    }
+
+    return nil
+}
+
+func migration006Down(db *gorm.DB) error {
+    // Drop indexes
+    indexes := []string{
+        "idx_schedules_child_id",
+        "idx_schedules_activity_id",
+        "idx_schedules_scheduled_date",
+        "idx_schedules_is_completed",
+        "idx_schedules_deleted_at",
+    }
+
+    for _, index := range indexes {
+        if err := db.Exec(fmt.Sprintf("DROP INDEX IF EXISTS %s", index)).Error; err != nil {
+            return err
+        }
+    }
+
+    // Drop table
+    if err := db.Migrator().DropTable(&model.Schedule{}); err != nil {
+        return err
     }
 
     return nil

@@ -26,6 +26,7 @@ type App struct {
 	activityService *services.ActivityService
 	noteService     *services.NoteService      
 	rewardService   *services.RewardService    
+	scheduleService *services.ScheduleService  
 	database        *gorm.DB
 }
 
@@ -52,7 +53,8 @@ func (a *App) startup(ctx context.Context) {
 	a.sessionService = services.NewSessionService(database)
 	a.activityService = services.NewActivityService(database)
 	a.noteService = services.NewNoteService(database)     
-	a.rewardService = services.NewRewardService(database) 
+	a.rewardService = services.NewRewardService(database)
+	a.scheduleService = services.NewScheduleService(database) 
 }
 
 // Greet returns a greeting for the given name
@@ -600,6 +602,404 @@ func (a *App) AchieveGoal(goalID uint) (*model.Goal, error) {
 	}
 
 	return &goal, nil
+}
+
+// ===== SCHEDULE MANAGEMENT =====
+
+// CreateSchedule creates a new therapy session schedule
+func (a *App) CreateSchedule(childID uint, activityID *uint, scheduledDate time.Time, scheduledTime, notes string, recurrencePattern string, recurrenceEndDate *time.Time, durationMinutes int) (*model.Schedule, error) {
+	schedule, err := a.scheduleService.CreateSchedule(childID, activityID, scheduledDate, scheduledTime, notes, recurrencePattern, recurrenceEndDate, durationMinutes)
+	if err != nil {
+		return nil, err
+	}
+
+	// Emit schedule created event
+	runtime.EventsEmit(a.ctx, "schedule_created", map[string]interface{}{
+		"schedule_id":    schedule.ID,
+		"child_id":       schedule.ChildID,
+		"scheduled_date": schedule.ScheduledDate,
+		"timestamp":      time.Now(),
+	})
+
+	return schedule, nil
+}
+
+// GetScheduleByID retrieves a specific schedule by ID
+func (a *App) GetScheduleByID(scheduleID uint) (*model.Schedule, error) {
+	return a.scheduleService.GetScheduleByID(scheduleID)
+}
+
+// GetSchedulesByChild retrieves all schedules for a specific child
+func (a *App) GetSchedulesByChild(childID uint) ([]model.Schedule, error) {
+	return a.scheduleService.GetSchedulesByChild(childID)
+}
+
+// GetUpcomingSchedules retrieves upcoming schedules for a child
+func (a *App) GetUpcomingSchedules(childID uint, days int) ([]model.Schedule, error) {
+	return a.scheduleService.GetUpcomingSchedules(childID, days)
+}
+
+// GetTodaySchedules retrieves today's schedules for a child
+func (a *App) GetTodaySchedules(childID uint) ([]model.Schedule, error) {
+	return a.scheduleService.GetTodaySchedules(childID)
+}
+
+// UpdateSchedule updates an existing schedule
+func (a *App) UpdateSchedule(scheduleID uint, activityID *uint, scheduledDate time.Time, scheduledTime, notes string, recurrencePattern string, durationMinutes int) (*model.Schedule, error) {
+	schedule, err := a.scheduleService.UpdateSchedule(scheduleID, activityID, scheduledDate, scheduledTime, notes, recurrencePattern, durationMinutes)
+	if err != nil {
+		return nil, err
+	}
+
+	// Emit schedule updated event
+	runtime.EventsEmit(a.ctx, "schedule_updated", map[string]interface{}{
+		"schedule_id": schedule.ID,
+		"child_id":    schedule.ChildID,
+		"timestamp":   time.Now(),
+	})
+
+	return schedule, nil
+}
+
+// CompleteSchedule marks a schedule as completed
+func (a *App) CompleteSchedule(scheduleID uint) (*model.Schedule, error) {
+	schedule, err := a.scheduleService.CompleteSchedule(scheduleID)
+	if err != nil {
+		return nil, err
+	}
+
+	// Emit schedule completed event
+	runtime.EventsEmit(a.ctx, "schedule_completed", map[string]interface{}{
+		"schedule_id":   schedule.ID,
+		"child_id":      schedule.ChildID,
+		"completed_at":  schedule.CompletedAt,
+		"timestamp":     time.Now(),
+	})
+
+	return schedule, nil
+}
+
+// DeleteSchedule deletes a schedule
+func (a *App) DeleteSchedule(scheduleID uint) error {
+	err := a.scheduleService.DeleteSchedule(scheduleID)
+	if err != nil {
+		return err
+	}
+
+	// Emit schedule deleted event
+	runtime.EventsEmit(a.ctx, "schedule_deleted", map[string]interface{}{
+		"schedule_id": scheduleID,
+		"timestamp":   time.Now(),
+	})
+
+	return nil
+}
+
+// CreateRecurringSchedules creates multiple recurring schedules
+func (a *App) CreateRecurringSchedules(childID uint, activityID *uint, startDate time.Time, scheduledTime, notes string, recurrencePattern string, recurrenceEndDate time.Time, durationMinutes int) ([]model.Schedule, error) {
+	schedules, err := a.scheduleService.CreateRecurringSchedules(childID, activityID, startDate, scheduledTime, notes, recurrencePattern, recurrenceEndDate, durationMinutes)
+	if err != nil {
+		return nil, err
+	}
+
+	// Emit schedules created event
+	scheduleIds := make([]uint, len(schedules))
+	for i, s := range schedules {
+		scheduleIds[i] = s.ID
+	}
+
+	runtime.EventsEmit(a.ctx, "schedules_created_batch", map[string]interface{}{
+		"schedule_ids": scheduleIds,
+		"child_id":     childID,
+		"count":        len(schedules),
+		"timestamp":    time.Now(),
+	})
+
+	return schedules, nil
+}
+
+// GetScheduleStats returns schedule statistics for a child
+func (a *App) GetScheduleStats(childID uint) (map[string]interface{}, error) {
+	return a.scheduleService.GetScheduleStats(childID)
+}
+
+// ===== ANALYTICS METHODS =====
+
+// GetSessionStatistics returns comprehensive session statistics for a child
+func (a *App) GetSessionStatistics(childID uint, monthsBack int) (map[string]interface{}, error) {
+	var sessions []model.Session
+	if err := a.database.Where("child_id = ? AND start_time >= ?", childID, time.Now().AddDate(0, -monthsBack, 0)).Find(&sessions).Error; err != nil {
+		return nil, fmt.Errorf("gagal mengambil data sesi: %w", err)
+	}
+
+	stats := map[string]interface{}{
+		"total_sessions":      len(sessions),
+		"completed_sessions":  0,
+		"total_duration":      0,
+		"average_duration":    0.0,
+		"sessions_by_month":   make(map[string]int),
+		"duration_by_month":   make(map[string]int),
+		"last_session":        nil,
+	}
+
+	completedCount := 0
+	totalDuration := 0
+	var lastSession *model.Session
+
+	for _, session := range sessions {
+		if session.EndTime != nil {
+			completedCount++
+			totalDuration += session.DurationMinutes
+			if lastSession == nil || session.EndTime.After(*lastSession.EndTime) {
+				lastSession = &session
+			}
+		}
+
+		// Group by month
+		month := session.StartTime.Format("2006-01")
+		if monthMap, ok := stats["sessions_by_month"].(map[string]int); ok {
+			monthMap[month]++
+		}
+
+		if session.EndTime != nil {
+			if durationMap, ok := stats["duration_by_month"].(map[string]int); ok {
+				durationMap[month] += session.DurationMinutes
+			}
+		}
+	}
+
+	stats["completed_sessions"] = completedCount
+	stats["total_duration"] = totalDuration
+
+	if len(sessions) > 0 {
+		stats["average_duration"] = float64(totalDuration) / float64(len(sessions))
+	}
+
+	if lastSession != nil {
+		stats["last_session"] = lastSession
+	}
+
+	return stats, nil
+}
+
+// GetActivityTrends returns activity usage trends for a child
+func (a *App) GetActivityTrends(childID uint, monthsBack int) (map[string]interface{}, error) {
+	startDate := time.Now().AddDate(0, -monthsBack, 0)
+
+	// Get all session activities for the child
+	var results []struct {
+		ActivityName string
+		Count        int
+		TotalMinutes int
+	}
+
+	query := `
+		SELECT a.name as activity_name, COUNT(*) as count, SUM(CAST((julianday(COALESCE(sa.end_time, CURRENT_TIMESTAMP)) - julianday(sa.start_time)) * 24 * 60 AS INTEGER)) as total_minutes
+		FROM session_activities sa
+		JOIN activities a ON a.id = sa.activity_id
+		JOIN sessions s ON s.id = sa.session_id
+		WHERE s.child_id = ? AND s.start_time >= ?
+		GROUP BY a.name
+		ORDER BY count DESC
+	`
+
+	if err := a.database.Raw(query, childID, startDate).Scan(&results).Error; err != nil {
+		return nil, fmt.Errorf("gagal mengambil tren aktivitas: %w", err)
+	}
+
+	trends := map[string]interface{}{
+		"activities":        []map[string]interface{}{},
+		"total_activities":  len(results),
+		"most_used":         nil,
+		"average_duration":  0.0,
+	}
+
+	if len(results) > 0 {
+		totalMinutes := 0
+		for _, r := range results {
+			totalMinutes += r.TotalMinutes
+			activity := map[string]interface{}{
+				"name":            r.ActivityName,
+				"count":           r.Count,
+				"total_minutes":   r.TotalMinutes,
+				"average_minutes": float64(r.TotalMinutes) / float64(r.Count),
+			}
+			trends["activities"] = append(trends["activities"].([]map[string]interface{}), activity)
+		}
+		trends["most_used"] = results[0]["activity_name"]
+		trends["average_duration"] = float64(totalMinutes) / float64(len(results))
+	}
+
+	return trends, nil
+}
+
+// GetProgressMetrics returns progress metrics for a child
+func (a *App) GetProgressMetrics(childID uint) (map[string]interface{}, error) {
+	var child model.Child
+	if err := a.database.Preload("Sessions").Preload("Goals").Preload("Rewards").First(&child, childID).Error; err != nil {
+		return nil, fmt.Errorf("anak tidak ditemukan: %w", err)
+	}
+
+	metrics := map[string]interface{}{
+		"child_id":        childID,
+		"child_name":      child.Name,
+		"total_sessions":  len(child.Sessions),
+		"total_goals":     len(child.Goals),
+		"achieved_goals":  0,
+		"total_rewards":   len(child.Rewards),
+		"completion_rate": 0.0,
+	}
+
+	// Count achieved goals
+	achievedGoals := 0
+	for _, goal := range child.Goals {
+		if goal.IsAchieved {
+			achievedGoals++
+		}
+	}
+
+	metrics["achieved_goals"] = achievedGoals
+
+	if len(child.Goals) > 0 {
+		metrics["completion_rate"] = float64(achievedGoals) / float64(len(child.Goals)) * 100
+	}
+
+	return metrics, nil
+}
+
+// GetChildComparisonStats returns comparison statistics between all children (anonymized)
+func (a *App) GetChildComparisonStats() (map[string]interface{}, error) {
+	var children []model.Child
+	if err := a.database.Find(&children).Error; err != nil {
+		return nil, fmt.Errorf("gagal mengambil data anak: %w", err)
+	}
+
+	stats := map[string]interface{}{
+		"total_children":       len(children),
+		"average_sessions":     0.0,
+		"average_goals":        0.0,
+		"average_rewards":      0.0,
+		"children_statistics": []map[string]interface{}{},
+	}
+
+	totalSessions := 0
+	totalGoals := 0
+	totalRewards := 0
+
+	for _, child := range children {
+		var sessionsCount int64
+		var goalsCount int64
+		var rewardsCount int64
+
+		a.database.Model(&model.Session{}).Where("child_id = ?", child.ID).Count(&sessionsCount)
+		a.database.Model(&model.Goal{}).Where("child_id = ?", child.ID).Count(&goalsCount)
+		a.database.Model(&model.Reward{}).Where("child_id = ?", child.ID).Count(&rewardsCount)
+
+		totalSessions += int(sessionsCount)
+		totalGoals += int(goalsCount)
+		totalRewards += int(rewardsCount)
+
+		childStat := map[string]interface{}{
+			"child_id":     child.ID,
+			"child_name":   child.Name,
+			"sessions":     sessionsCount,
+			"goals":        goalsCount,
+			"rewards":      rewardsCount,
+		}
+
+		stats["children_statistics"] = append(stats["children_statistics"].([]map[string]interface{}), childStat)
+	}
+
+	if len(children) > 0 {
+		stats["average_sessions"] = float64(totalSessions) / float64(len(children))
+		stats["average_goals"] = float64(totalGoals) / float64(len(children))
+		stats["average_rewards"] = float64(totalRewards) / float64(len(children))
+	}
+
+	return stats, nil
+}
+
+// GetMonthlyReportData returns comprehensive monthly report data for a child
+func (a *App) GetMonthlyReportData(childID uint, year int, month int) (map[string]interface{}, error) {
+	monthStart := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, time.UTC)
+	monthEnd := monthStart.AddDate(0, 1, -1)
+
+	// Get sessions for the month
+	var sessions []model.Session
+	if err := a.database.Where("child_id = ? AND start_time >= ? AND start_time <= ?", childID, monthStart, monthEnd).
+		Find(&sessions).Error; err != nil {
+		return nil, fmt.Errorf("gagal mengambil sesi: %w", err)
+	}
+
+	// Get activities for the month
+	var activities []struct {
+		Name  string
+		Count int
+	}
+
+	query := `
+		SELECT a.name, COUNT(*) as count
+		FROM session_activities sa
+		JOIN activities a ON a.id = sa.activity_id
+		JOIN sessions s ON s.id = sa.session_id
+		WHERE s.child_id = ? AND s.start_time >= ? AND s.start_time <= ?
+		GROUP BY a.name
+	`
+
+	if err := a.database.Raw(query, childID, monthStart, monthEnd).Scan(&activities).Error; err != nil {
+		return nil, fmt.Errorf("gagal mengambil aktivitas: %w", err)
+	}
+
+	// Get goals for the month
+	var goals []model.Goal
+	if err := a.database.Where("child_id = ? AND start_date >= ? AND start_date <= ?", childID, monthStart, monthEnd).
+		Find(&goals).Error; err != nil {
+		return nil, fmt.Errorf("gagal mengambil tujuan: %w", err)
+	}
+
+	// Get rewards for the month
+	var rewards []model.Reward
+	if err := a.database.Where("child_id = ? AND timestamp >= ? AND timestamp <= ?", childID, monthStart, monthEnd).
+		Find(&rewards).Error; err != nil {
+		return nil, fmt.Errorf("gagal mengambil reward: %w", err)
+	}
+
+	report := map[string]interface{}{
+		"child_id":               childID,
+		"month":                  monthStart.Format("January 2006"),
+		"total_sessions":         len(sessions),
+		"completed_sessions":     0,
+		"total_session_minutes":  0,
+		"activities":             activities,
+		"total_activities":       len(activities),
+		"goals":                  len(goals),
+		"completed_goals":        0,
+		"total_rewards":          len(rewards),
+		"generated_at":           time.Now(),
+	}
+
+	completedSessions := 0
+	totalMinutes := 0
+
+	for _, session := range sessions {
+		if session.EndTime != nil {
+			completedSessions++
+			totalMinutes += session.DurationMinutes
+		}
+	}
+
+	completedGoals := 0
+	for _, goal := range goals {
+		if goal.IsAchieved {
+			completedGoals++
+		}
+	}
+
+	report["completed_sessions"] = completedSessions
+	report["total_session_minutes"] = totalMinutes
+	report["completed_goals"] = completedGoals
+
+	return report, nil
 }
 
 // ===== FLASHCARD MANAGEMENT =====

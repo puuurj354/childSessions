@@ -18,6 +18,10 @@ export function AutoPauseInactiveActivities(arg1, arg2) {
   return window['go']['main']['App']['AutoPauseInactiveActivities'](arg1, arg2);
 }
 
+export function CompleteSchedule(arg1) {
+  return window['go']['main']['App']['CompleteSchedule'](arg1);
+}
+
 export function CreateActivity(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['main']['App']['CreateActivity'](arg1, arg2, arg3, arg4, arg5);
 }
@@ -38,6 +42,14 @@ export function CreateNoteTemplate(arg1, arg2, arg3) {
   return window['go']['main']['App']['CreateNoteTemplate'](arg1, arg2, arg3);
 }
 
+export function CreateRecurringSchedules(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) {
+  return window['go']['main']['App']['CreateRecurringSchedules'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+}
+
+export function CreateSchedule(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) {
+  return window['go']['main']['App']['CreateSchedule'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
+}
+
 export function DeleteActivity(arg1) {
   return window['go']['main']['App']['DeleteActivity'](arg1);
 }
@@ -56,6 +68,10 @@ export function DeleteNoteTemplate(arg1) {
 
 export function DeleteReward(arg1) {
   return window['go']['main']['App']['DeleteReward'](arg1);
+}
+
+export function DeleteSchedule(arg1) {
+  return window['go']['main']['App']['DeleteSchedule'](arg1);
 }
 
 export function EndActivityInSession(arg1, arg2) {
@@ -154,6 +170,18 @@ export function GetRewardSummary(arg1) {
   return window['go']['main']['App']['GetRewardSummary'](arg1);
 }
 
+export function GetScheduleByID(arg1) {
+  return window['go']['main']['App']['GetScheduleByID'](arg1);
+}
+
+export function GetScheduleStats(arg1) {
+  return window['go']['main']['App']['GetScheduleStats'](arg1);
+}
+
+export function GetSchedulesByChild(arg1) {
+  return window['go']['main']['App']['GetSchedulesByChild'](arg1);
+}
+
 export function GetSessionActivities(arg1) {
   return window['go']['main']['App']['GetSessionActivities'](arg1);
 }
@@ -178,8 +206,16 @@ export function GetSessionsByChild(arg1) {
   return window['go']['main']['App']['GetSessionsByChild'](arg1);
 }
 
+export function GetTodaySchedules(arg1) {
+  return window['go']['main']['App']['GetTodaySchedules'](arg1);
+}
+
 export function GetTodaySessionsCount() {
   return window['go']['main']['App']['GetTodaySessionsCount']();
+}
+
+export function GetUpcomingSchedules(arg1, arg2) {
+  return window['go']['main']['App']['GetUpcomingSchedules'](arg1, arg2);
 }
 
 export function Greet(arg1) {
@@ -228,6 +264,10 @@ export function UpdateNote(arg1, arg2, arg3) {
 
 export function UpdateNoteTemplate(arg1, arg2, arg3, arg4) {
   return window['go']['main']['App']['UpdateNoteTemplate'](arg1, arg2, arg3, arg4);
+}
+
+export function UpdateSchedule(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
+  return window['go']['main']['App']['UpdateSchedule'](arg1, arg2, arg3, arg4, arg5, arg6, arg7);
 }
 
 export function UpdateSessionSummaryNotes(arg1, arg2) {

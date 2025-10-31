@@ -2,10 +2,8 @@ export namespace model {
 	
 	export class Flashcard {
 	    ID: number;
-	    // Go type: time
-	    CreatedAt: any;
-	    // Go type: time
-	    UpdatedAt: any;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
 	    // Go type: gorm
 	    DeletedAt: any;
 	    Category: string;
@@ -21,8 +19,8 @@ export namespace model {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
-	        this.CreatedAt = this.convertValues(source["CreatedAt"], null);
-	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], null);
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
 	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
 	        this.Category = source["Category"];
 	        this.TextContent = source["TextContent"];
@@ -51,10 +49,8 @@ export namespace model {
 	}
 	export class SessionFlashcard {
 	    ID: number;
-	    // Go type: time
-	    CreatedAt: any;
-	    // Go type: time
-	    UpdatedAt: any;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
 	    // Go type: gorm
 	    DeletedAt: any;
 	    SessionID: number;
@@ -63,8 +59,7 @@ export namespace model {
 	    Flashcard: Flashcard;
 	    ResponseTag: string;
 	    ResponseNotes: string;
-	    // Go type: time
-	    Timestamp: any;
+	    Timestamp: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new SessionFlashcard(source);
@@ -73,8 +68,8 @@ export namespace model {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
-	        this.CreatedAt = this.convertValues(source["CreatedAt"], null);
-	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], null);
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
 	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
 	        this.SessionID = source["SessionID"];
 	        this.Session = this.convertValues(source["Session"], Session);
@@ -82,7 +77,7 @@ export namespace model {
 	        this.Flashcard = this.convertValues(source["Flashcard"], Flashcard);
 	        this.ResponseTag = source["ResponseTag"];
 	        this.ResponseNotes = source["ResponseNotes"];
-	        this.Timestamp = this.convertValues(source["Timestamp"], null);
+	        this.Timestamp = this.convertValues(source["Timestamp"], time.Time);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -105,18 +100,15 @@ export namespace model {
 	}
 	export class Note {
 	    ID: number;
-	    // Go type: time
-	    CreatedAt: any;
-	    // Go type: time
-	    UpdatedAt: any;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
 	    // Go type: gorm
 	    DeletedAt: any;
 	    SessionID: number;
 	    Session: Session;
 	    NoteText: string;
 	    Category: string;
-	    // Go type: time
-	    Timestamp: any;
+	    Timestamp: time.Time;
 	    IsEncrypted: boolean;
 	
 	    static createFrom(source: any = {}) {
@@ -126,14 +118,14 @@ export namespace model {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
-	        this.CreatedAt = this.convertValues(source["CreatedAt"], null);
-	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], null);
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
 	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
 	        this.SessionID = source["SessionID"];
 	        this.Session = this.convertValues(source["Session"], Session);
 	        this.NoteText = source["NoteText"];
 	        this.Category = source["Category"];
-	        this.Timestamp = this.convertValues(source["Timestamp"], null);
+	        this.Timestamp = this.convertValues(source["Timestamp"], time.Time);
 	        this.IsEncrypted = source["IsEncrypted"];
 	    }
 	
@@ -157,10 +149,8 @@ export namespace model {
 	}
 	export class Goal {
 	    ID: number;
-	    // Go type: time
-	    CreatedAt: any;
-	    // Go type: time
-	    UpdatedAt: any;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
 	    // Go type: gorm
 	    DeletedAt: any;
 	    ChildID: number;
@@ -169,13 +159,10 @@ export namespace model {
 	    Description: string;
 	    TargetValue: number;
 	    TargetType: string;
-	    // Go type: time
-	    StartDate: any;
-	    // Go type: time
-	    EndDate?: any;
+	    StartDate: time.Time;
+	    EndDate?: time.Time;
 	    IsAchieved: boolean;
-	    // Go type: time
-	    AchievedDate?: any;
+	    AchievedDate?: time.Time;
 	
 	    static createFrom(source: any = {}) {
 	        return new Goal(source);
@@ -184,8 +171,8 @@ export namespace model {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
-	        this.CreatedAt = this.convertValues(source["CreatedAt"], null);
-	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], null);
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
 	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
 	        this.ChildID = source["ChildID"];
 	        this.Child = this.convertValues(source["Child"], Child);
@@ -193,10 +180,10 @@ export namespace model {
 	        this.Description = source["Description"];
 	        this.TargetValue = source["TargetValue"];
 	        this.TargetType = source["TargetType"];
-	        this.StartDate = this.convertValues(source["StartDate"], null);
-	        this.EndDate = this.convertValues(source["EndDate"], null);
+	        this.StartDate = this.convertValues(source["StartDate"], time.Time);
+	        this.EndDate = this.convertValues(source["EndDate"], time.Time);
 	        this.IsAchieved = source["IsAchieved"];
-	        this.AchievedDate = this.convertValues(source["AchievedDate"], null);
+	        this.AchievedDate = this.convertValues(source["AchievedDate"], time.Time);
 	    }
 	
 		convertValues(a: any, classs: any, asMap: boolean = false): any {
@@ -219,10 +206,8 @@ export namespace model {
 	}
 	export class Reward {
 	    ID: number;
-	    // Go type: time
-	    CreatedAt: any;
-	    // Go type: time
-	    UpdatedAt: any;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
 	    // Go type: gorm
 	    DeletedAt: any;
 	    ChildID: number;
@@ -231,8 +216,7 @@ export namespace model {
 	    Session: Session;
 	    Type: string;
 	    Value: number;
-	    // Go type: time
-	    Timestamp: any;
+	    Timestamp: time.Time;
 	    Notes: string;
 	
 	    static createFrom(source: any = {}) {
@@ -242,8 +226,8 @@ export namespace model {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
-	        this.CreatedAt = this.convertValues(source["CreatedAt"], null);
-	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], null);
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
 	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
 	        this.ChildID = source["ChildID"];
 	        this.Child = this.convertValues(source["Child"], Child);
@@ -251,7 +235,7 @@ export namespace model {
 	        this.Session = this.convertValues(source["Session"], Session);
 	        this.Type = source["Type"];
 	        this.Value = source["Value"];
-	        this.Timestamp = this.convertValues(source["Timestamp"], null);
+	        this.Timestamp = this.convertValues(source["Timestamp"], time.Time);
 	        this.Notes = source["Notes"];
 	    }
 	
@@ -275,15 +259,12 @@ export namespace model {
 	}
 	export class Child {
 	    ID: number;
-	    // Go type: time
-	    CreatedAt: any;
-	    // Go type: time
-	    UpdatedAt: any;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
 	    // Go type: gorm
 	    DeletedAt: any;
 	    Name: string;
-	    // Go type: time
-	    DateOfBirth?: any;
+	    DateOfBirth?: time.Time;
 	    Gender: string;
 	    ParentGuardianName: string;
 	    ContactInfo: string;
@@ -299,11 +280,11 @@ export namespace model {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
-	        this.CreatedAt = this.convertValues(source["CreatedAt"], null);
-	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], null);
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
 	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
 	        this.Name = source["Name"];
-	        this.DateOfBirth = this.convertValues(source["DateOfBirth"], null);
+	        this.DateOfBirth = this.convertValues(source["DateOfBirth"], time.Time);
 	        this.Gender = source["Gender"];
 	        this.ParentGuardianName = source["ParentGuardianName"];
 	        this.ContactInfo = source["ContactInfo"];
@@ -333,18 +314,14 @@ export namespace model {
 	}
 	export class Session {
 	    ID: number;
-	    // Go type: time
-	    CreatedAt: any;
-	    // Go type: time
-	    UpdatedAt: any;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
 	    // Go type: gorm
 	    DeletedAt: any;
 	    ChildID: number;
 	    Child: Child;
-	    // Go type: time
-	    StartTime: any;
-	    // Go type: time
-	    EndTime?: any;
+	    StartTime: time.Time;
+	    EndTime?: time.Time;
 	    DurationMinutes: number;
 	    SummaryNotes: string;
 	    Notes: Note[];
@@ -359,13 +336,13 @@ export namespace model {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
-	        this.CreatedAt = this.convertValues(source["CreatedAt"], null);
-	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], null);
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
 	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
 	        this.ChildID = source["ChildID"];
 	        this.Child = this.convertValues(source["Child"], Child);
-	        this.StartTime = this.convertValues(source["StartTime"], null);
-	        this.EndTime = this.convertValues(source["EndTime"], null);
+	        this.StartTime = this.convertValues(source["StartTime"], time.Time);
+	        this.EndTime = this.convertValues(source["EndTime"], time.Time);
 	        this.DurationMinutes = source["DurationMinutes"];
 	        this.SummaryNotes = source["SummaryNotes"];
 	        this.Notes = this.convertValues(source["Notes"], Note);
@@ -394,20 +371,16 @@ export namespace model {
 	}
 	export class SessionActivity {
 	    ID: number;
-	    // Go type: time
-	    CreatedAt: any;
-	    // Go type: time
-	    UpdatedAt: any;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
 	    // Go type: gorm
 	    DeletedAt: any;
 	    SessionID: number;
 	    Session: Session;
 	    ActivityID: number;
 	    Activity: Activity;
-	    // Go type: time
-	    StartTime?: any;
-	    // Go type: time
-	    EndTime?: any;
+	    StartTime?: time.Time;
+	    EndTime?: time.Time;
 	    Notes: string;
 	
 	    static createFrom(source: any = {}) {
@@ -417,15 +390,15 @@ export namespace model {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
-	        this.CreatedAt = this.convertValues(source["CreatedAt"], null);
-	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], null);
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
 	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
 	        this.SessionID = source["SessionID"];
 	        this.Session = this.convertValues(source["Session"], Session);
 	        this.ActivityID = source["ActivityID"];
 	        this.Activity = this.convertValues(source["Activity"], Activity);
-	        this.StartTime = this.convertValues(source["StartTime"], null);
-	        this.EndTime = this.convertValues(source["EndTime"], null);
+	        this.StartTime = this.convertValues(source["StartTime"], time.Time);
+	        this.EndTime = this.convertValues(source["EndTime"], time.Time);
 	        this.Notes = source["Notes"];
 	    }
 	
@@ -449,10 +422,8 @@ export namespace model {
 	}
 	export class Activity {
 	    ID: number;
-	    // Go type: time
-	    CreatedAt: any;
-	    // Go type: time
-	    UpdatedAt: any;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
 	    // Go type: gorm
 	    DeletedAt: any;
 	    Name: string;
@@ -469,8 +440,8 @@ export namespace model {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
-	        this.CreatedAt = this.convertValues(source["CreatedAt"], null);
-	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], null);
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
 	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
 	        this.Name = source["Name"];
 	        this.Description = source["Description"];
@@ -504,10 +475,8 @@ export namespace model {
 	
 	export class NoteTemplate {
 	    ID: number;
-	    // Go type: time
-	    CreatedAt: any;
-	    // Go type: time
-	    UpdatedAt: any;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
 	    // Go type: gorm
 	    DeletedAt: any;
 	    TemplateText: string;
@@ -521,8 +490,8 @@ export namespace model {
 	    constructor(source: any = {}) {
 	        if ('string' === typeof source) source = JSON.parse(source);
 	        this.ID = source["ID"];
-	        this.CreatedAt = this.convertValues(source["CreatedAt"], null);
-	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], null);
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
 	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
 	        this.TemplateText = source["TemplateText"];
 	        this.CategoryHint = source["CategoryHint"];
@@ -548,8 +517,90 @@ export namespace model {
 		}
 	}
 	
+	export class Schedule {
+	    ID: number;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
+	    // Go type: gorm
+	    DeletedAt: any;
+	    ChildID: number;
+	    Child: Child;
+	    ActivityID?: number;
+	    Activity?: Activity;
+	    ScheduledDate: time.Time;
+	    ScheduledTime: string;
+	    DurationMinutes: number;
+	    Notes: string;
+	    RecurrencePattern: string;
+	    RecurrenceEndDate?: time.Time;
+	    IsCompleted: boolean;
+	    CompletedAt?: time.Time;
+	    Reminder: boolean;
+	    ReminderMinutes: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new Schedule(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ID = source["ID"];
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
+	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
+	        this.ChildID = source["ChildID"];
+	        this.Child = this.convertValues(source["Child"], Child);
+	        this.ActivityID = source["ActivityID"];
+	        this.Activity = this.convertValues(source["Activity"], Activity);
+	        this.ScheduledDate = this.convertValues(source["ScheduledDate"], time.Time);
+	        this.ScheduledTime = source["ScheduledTime"];
+	        this.DurationMinutes = source["DurationMinutes"];
+	        this.Notes = source["Notes"];
+	        this.RecurrencePattern = source["RecurrencePattern"];
+	        this.RecurrenceEndDate = this.convertValues(source["RecurrenceEndDate"], time.Time);
+	        this.IsCompleted = source["IsCompleted"];
+	        this.CompletedAt = this.convertValues(source["CompletedAt"], time.Time);
+	        this.Reminder = source["Reminder"];
+	        this.ReminderMinutes = source["ReminderMinutes"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	
 	
+
+}
+
+export namespace time {
+	
+	export class Time {
+	
+	
+	    static createFrom(source: any = {}) {
+	        return new Time(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	
+	    }
+	}
 
 }
 

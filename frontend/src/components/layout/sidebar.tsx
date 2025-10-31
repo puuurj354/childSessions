@@ -9,6 +9,8 @@ import {
   Settings,
   LayoutDashboard,
   TrendingUp,
+  BarChart3,
+  Clock,
 } from "lucide-react"
 import {
   Sidebar,
@@ -42,6 +44,8 @@ export function AppSidebar({ activePage, setActivePage }: AppSidebarProps) {
     },
     { icon: <Award size={20} />, label: "Rewards", value: "rewards" },
     { icon: <FileText size={20} />, label: "Catatan", value: "notes" },
+    { icon: <Clock size={20} />, label: "Jadwal", value: "schedule" },
+    { icon: <BarChart3 size={20} />, label: "Analytics", value: "analytics" },
     { icon: <Settings size={20} />, label: "Pengaturan", value: "settings" },
   ]
 

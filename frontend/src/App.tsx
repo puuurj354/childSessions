@@ -12,6 +12,8 @@ import { NotesLibrary } from "./pages/notes/NotesLibrary"
 import { ActivityLibrary } from "./pages/activities/ActivityLibrary"
 import { Settings } from "./pages/Settings"
 import { Toaster } from "./components/ui/sonner"
+import ScheduleManager from "./pages/schedule/ScheduleManager"
+import AnalyticsDashboard from "./pages/analytics/AnalyticsDashboard"
 
 function App() {
   const [activePage, setActivePage] = useState("dashboard")
@@ -32,6 +34,10 @@ function App() {
         return <RewardsSystem />
       case "notes":
         return <NotesLibrary />
+      case "schedule":
+        return <ScheduleManager />
+      case "analytics":
+        return <AnalyticsDashboard />
       case "settings":
         return <Settings />
       default:
@@ -70,6 +76,10 @@ function getPageTitle(page: string): string {
       return "Sistem Reward"
     case "notes":
       return "Catatan"
+    case "schedule":
+      return "Manajemen Jadwal"
+    case "analytics":
+      return "Analytics & Insights"
     case "settings":
       return "Pengaturan"
     default:
