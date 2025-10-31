@@ -110,6 +110,10 @@ export function GetActivityByID(arg1) {
   return window['go']['main']['App']['GetActivityByID'](arg1);
 }
 
+export function GetActivityTrends(arg1, arg2) {
+  return window['go']['main']['App']['GetActivityTrends'](arg1, arg2);
+}
+
 export function GetAllActivities() {
   return window['go']['main']['App']['GetAllActivities']();
 }
@@ -128,6 +132,10 @@ export function GetChildActivityFrequency(arg1) {
 
 export function GetChildByID(arg1) {
   return window['go']['main']['App']['GetChildByID'](arg1);
+}
+
+export function GetChildComparisonStats() {
+  return window['go']['main']['App']['GetChildComparisonStats']();
 }
 
 export function GetChildGoals(arg1) {
@@ -162,8 +170,16 @@ export function GetFlashcardsByCategory(arg1) {
   return window['go']['main']['App']['GetFlashcardsByCategory'](arg1);
 }
 
+export function GetMonthlyReportData(arg1, arg2, arg3) {
+  return window['go']['main']['App']['GetMonthlyReportData'](arg1, arg2, arg3);
+}
+
 export function GetMostPopularActivity() {
   return window['go']['main']['App']['GetMostPopularActivity']();
+}
+
+export function GetProgressMetrics(arg1) {
+  return window['go']['main']['App']['GetProgressMetrics'](arg1);
 }
 
 export function GetRewardSummary(arg1) {
@@ -200,6 +216,10 @@ export function GetSessionNotes(arg1) {
 
 export function GetSessionProgress(arg1) {
   return window['go']['main']['App']['GetSessionProgress'](arg1);
+}
+
+export function GetSessionStatistics(arg1, arg2) {
+  return window['go']['main']['App']['GetSessionStatistics'](arg1, arg2);
 }
 
 export function GetSessionsByChild(arg1) {

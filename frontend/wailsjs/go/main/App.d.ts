@@ -57,6 +57,8 @@ export function GetActiveSessions():Promise<number>;
 
 export function GetActivityByID(arg1:number):Promise<model.Activity>;
 
+export function GetActivityTrends(arg1:number,arg2:number):Promise<Record<string, any>>;
+
 export function GetAllActivities():Promise<Array<model.Activity>>;
 
 export function GetAllChildren():Promise<Array<model.Child>>;
@@ -66,6 +68,8 @@ export function GetAllNoteTemplates():Promise<Array<model.NoteTemplate>>;
 export function GetChildActivityFrequency(arg1:number):Promise<Record<string, number>>;
 
 export function GetChildByID(arg1:number):Promise<model.Child>;
+
+export function GetChildComparisonStats():Promise<Record<string, any>>;
 
 export function GetChildGoals(arg1:number):Promise<Array<model.Goal>>;
 
@@ -83,7 +87,11 @@ export function GetDashboardStats():Promise<Record<string, any>>;
 
 export function GetFlashcardsByCategory(arg1:string):Promise<Array<model.Flashcard>>;
 
+export function GetMonthlyReportData(arg1:number,arg2:number,arg3:number):Promise<Record<string, any>>;
+
 export function GetMostPopularActivity():Promise<string>;
+
+export function GetProgressMetrics(arg1:number):Promise<Record<string, any>>;
 
 export function GetRewardSummary(arg1:number):Promise<Record<string, any>>;
 
@@ -102,6 +110,8 @@ export function GetSessionByID(arg1:number):Promise<model.Session>;
 export function GetSessionNotes(arg1:number):Promise<Array<model.Note>>;
 
 export function GetSessionProgress(arg1:number):Promise<Record<string, any>>;
+
+export function GetSessionStatistics(arg1:number,arg2:number):Promise<Record<string, any>>;
 
 export function GetSessionsByChild(arg1:number):Promise<Array<model.Session>>;
 

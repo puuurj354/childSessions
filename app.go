@@ -826,7 +826,7 @@ func (a *App) GetActivityTrends(childID uint, monthsBack int) (map[string]interf
 			}
 			trends["activities"] = append(trends["activities"].([]map[string]interface{}), activity)
 		}
-		trends["most_used"] = results[0]["activity_name"]
+		trends["most_used"] = results[0].ActivityName
 		trends["average_duration"] = float64(totalMinutes) / float64(len(results))
 	}
 
