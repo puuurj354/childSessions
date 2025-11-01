@@ -1,3 +1,4 @@
+import { toDate } from "@/lib/utils"
 import React, { useEffect, useState } from "react"
 import {
   Card,
@@ -272,7 +273,7 @@ export function RewardsSystem() {
 
   // Group rewards by month
   const groupedRewards = filteredRewards.reduce((acc, reward) => {
-    const date = new Date(reward.Timestamp)
+    const date = toDate(reward.Timestamp)
     const monthYear = `${date.toLocaleString("id-ID", {
       month: "long",
     })} ${date.getFullYear()}`
@@ -688,7 +689,7 @@ export function RewardsSystem() {
                                             <div className="flex items-center gap-2 text-sm text-gray-600">
                                               <Calendar size={14} />
                                               <span>
-                                                {new Date(
+                                                {toDate(
                                                   reward.Timestamp
                                                 ).toLocaleDateString("id-ID", {
                                                   weekday: "long",
@@ -711,7 +712,7 @@ export function RewardsSystem() {
                                               ×{reward.Value}
                                             </div>
                                             <div className="text-xs text-gray-500">
-                                              {new Date(
+                                              {toDate(
                                                 reward.Timestamp
                                               ).toLocaleTimeString("id-ID", {
                                                 hour: "2-digit",

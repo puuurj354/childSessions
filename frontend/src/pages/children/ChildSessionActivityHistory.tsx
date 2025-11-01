@@ -1,3 +1,4 @@
+import { toDate } from "@/lib/utils"
 import React, { useEffect, useState } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Clock, FileText, Activity as ActivityIcon } from "lucide-react"
@@ -61,12 +62,12 @@ export function ChildSessionActivityHistory({ childId, childName }: Props) {
                   <div className="text-xs text-muted-foreground">
                     Sesi:{" "}
                     {activity.Session?.StartTime
-                      ? new Date(activity.Session.StartTime).toLocaleDateString(
+                      ? toDate(activity.Session.StartTime).toLocaleDateString(
                           "id-ID"
                         )
                       : "-"}{" "}
                     {activity.Session?.StartTime
-                      ? new Date(activity.Session.StartTime).toLocaleTimeString(
+                      ? toDate(activity.Session.StartTime).toLocaleTimeString(
                           "id-ID"
                         )
                       : ""}
@@ -74,12 +75,12 @@ export function ChildSessionActivityHistory({ childId, childName }: Props) {
                   <div className="text-xs text-muted-foreground">
                     Mulai:{" "}
                     {activity.StartTime
-                      ? new Date(activity.StartTime).toLocaleTimeString("id-ID")
+                      ? toDate(activity.StartTime).toLocaleTimeString("id-ID")
                       : "-"}
                     {activity.EndTime && (
                       <>
                         {" | "}Selesai:{" "}
-                        {new Date(activity.EndTime).toLocaleTimeString("id-ID")}
+                        {toDate(activity.EndTime).toLocaleTimeString("id-ID")}
                       </>
                     )}
                   </div>
@@ -87,8 +88,8 @@ export function ChildSessionActivityHistory({ childId, childName }: Props) {
                     Durasi:{" "}
                     {activity.StartTime
                       ? `${Math.round(
-                          (new Date(activity.EndTime || new Date()).getTime() -
-                            new Date(activity.StartTime).getTime()) /
+                          (toDate(activity.EndTime || new Date()).getTime() -
+                            toDate(activity.StartTime).getTime()) /
                             60000 || 0
                         )} menit`
                       : "-"}
@@ -103,7 +104,7 @@ export function ChildSessionActivityHistory({ childId, childName }: Props) {
                   <Clock size={16} className="text-gray-400" />
                   <span className="text-xs text-gray-500">
                     {activity.CreatedAt
-                      ? new Date(activity.CreatedAt).toLocaleString("id-ID")
+                      ? toDate(activity.CreatedAt).toLocaleString("id-ID")
                       : ""}
                   </span>
                 </div>

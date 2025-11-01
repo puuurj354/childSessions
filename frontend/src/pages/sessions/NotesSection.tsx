@@ -1,3 +1,4 @@
+import { toDate } from "@/lib/utils"
 import React, { useEffect, useState, useRef } from "react"
 import {
   AddNote,
@@ -403,7 +404,7 @@ export function NotesSection({
                         </span>
                       )}
                       <span className="text-xs text-muted-foreground">
-                        {new Date(note.Timestamp).toLocaleString("id-ID")}
+                        {toDate(note.Timestamp).toLocaleString("id-ID")}
                       </span>
                       <div className="mt-1 text-sm whitespace-pre-wrap font-mono">
                         {note.NoteText}

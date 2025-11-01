@@ -10,8 +10,12 @@ import {
   GetAllActivities,
   UpdateSchedule,
   CompleteSchedule,
-} from '@/wailsjs/go/main/App';
+} from '../../../wailsjs/go/main/App';
 import { Trash2, Edit, Check, Plus } from 'lucide-react';
+import { formatDateIndonesian, formatDateForInput, toDate } from '@/lib/utils';
+import * as models from '../../../wailsjs/go/models';
+
+type Schedule = models.model.Schedule;
 
 interface Child {
   ID: number;
@@ -23,19 +27,6 @@ interface Activity {
   ID: number;
   Name: string;
   Description: string;
-}
-
-interface Schedule {
-  ID: number;
-  ChildID: number;
-  ActivityID?: number;
-  ScheduledDate: string;
-  ScheduledTime: string;
-  Notes: string;
-  IsCompleted: boolean;
-  RecurrencePattern: string;
-  DurationMinutes: number;
-  Activity?: Activity;
 }
 
 const ScheduleManager: React.FC = () => {
@@ -126,7 +117,7 @@ const ScheduleManager: React.FC = () => {
           formData.scheduledTime,
           formData.notes,
           formData.recurrencePattern,
-          null,
+          undefined as any,
           formData.durationMinutes
         );
       }
@@ -142,7 +133,7 @@ const ScheduleManager: React.FC = () => {
   const handleEdit = (schedule: Schedule) => {
     setEditingSchedule(schedule);
     setFormData({
-      scheduledDate: schedule.ScheduledDate.split('T')[0],
+      scheduledDate: formatDateForInput(toDate(schedule.ScheduledDate)),
       scheduledTime: schedule.ScheduledTime,
       activityId: schedule.ActivityID?.toString() || '',
       notes: schedule.Notes,
@@ -369,20 +360,13 @@ const ScheduleManager: React.FC = () => {
               {upcomingSchedules.length > 0 ? (
                 <div className="space-y-4">
                   {upcomingSchedules.map((schedule) => (
-                    <div
-                      key={schedule.ID}
-                      className="flex items-center justify-between p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
+                    <div className="flex items-center justify-between p-4 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
                     >
                       <div className="flex-1">
                         <div className="flex items-center gap-4">
                           <div>
                             <p className="font-semibold text-gray-900">
-                              {new Date(schedule.ScheduledDate).toLocaleDateString('id-ID', {
-                                weekday: 'long',
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric',
-                              })}
+                              {formatDateIndonesian(toDate(schedule.ScheduledDate))}
                             </p>
                             <p className="text-gray-600">
                               {schedule.ScheduledTime} ({schedule.DurationMinutes} menit)
@@ -449,7 +433,7 @@ const ScheduleManager: React.FC = () => {
                     >
                       <div>
                         <p className="font-medium text-gray-900 line-through">
-                          {new Date(schedule.ScheduledDate).toLocaleDateString('id-ID')} -
+                          {formatDateForInput(toDate(schedule.ScheduledDate))} -
                           {schedule.ScheduledTime}
                         </p>
                         {schedule.Activity && (

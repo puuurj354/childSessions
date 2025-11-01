@@ -1,3 +1,4 @@
+import { toDate } from "@/lib/utils"
 import React, { useEffect, useState, useCallback, useRef } from "react"
 import {
   Card,
@@ -321,7 +322,7 @@ export function SessionManager() {
 
         // Calculate initial duration
         const now = new Date()
-        const start = new Date(session.StartTime)
+        const start = toDate(session.StartTime)
         const durationMs = now.getTime() - start.getTime()
         setSessionDuration(Math.floor(durationMs / 1000))
       }
@@ -471,7 +472,7 @@ export function SessionManager() {
                   </p>
                   <p className="text-xs sm:text-sm text-green-600">
                     Dimulai:{" "}
-                    {new Date(activeSession.StartTime).toLocaleTimeString(
+                    {toDate(activeSession.StartTime).toLocaleTimeString(
                       "id-ID"
                     )}
                   </p>
@@ -585,7 +586,7 @@ export function SessionManager() {
                               <p className="text-sm text-gray-500">
                                 {child.Gender} •{" "}
                                 {new Date().getFullYear() -
-                                  new Date(
+                                  toDate(
                                     child.DateOfBirth
                                   ).getFullYear()}{" "}
                                 tahun
@@ -645,7 +646,7 @@ export function SessionManager() {
                     }{" "}
                     • Umur:{" "}
                     {new Date().getFullYear() -
-                      new Date(
+                      toDate(
                         filteredChildren.find((c) => c.ID === selectedChildId)
                           ?.DateOfBirth || new Date()
                       ).getFullYear()}{" "}

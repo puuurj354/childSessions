@@ -1,3 +1,4 @@
+import { toDate } from "@/lib/utils"
 import React, { useEffect, useState } from "react"
 import {
   Card,
@@ -217,7 +218,7 @@ export function ActivitySection({
               {activeActivities.map((activity) => (
                 <div key={activity.ID} className="text-sm text-orange-700">
                   • {activity.Activity?.Name} -{" "}
-                  {formatDuration(activity.StartTime || "")}
+                  {formatDuration(toDate(activity.StartTime || new Date()).toISOString() || "")}
                 </div>
               ))}
             </div>
@@ -333,7 +334,7 @@ export function ActivitySection({
                         <span>
                           Mulai:{" "}
                           {activity.StartTime
-                            ? new Date(activity.StartTime).toLocaleTimeString(
+                            ? toDate(activity.StartTime).toLocaleTimeString(
                                 "id-ID"
                               )
                             : "-"}
@@ -341,7 +342,7 @@ export function ActivitySection({
                         {activity.EndTime && (
                           <span>
                             | Selesai:{" "}
-                            {new Date(activity.EndTime).toLocaleTimeString(
+                            {toDate(activity.EndTime).toLocaleTimeString(
                               "id-ID"
                             )}
                           </span>
@@ -350,7 +351,7 @@ export function ActivitySection({
                       <div>
                         Durasi:{" "}
                         {activity.StartTime
-                          ? formatDuration(activity.StartTime, activity.EndTime)
+                          ? formatDuration(toDate(activity.StartTime).toISOString(), activity.EndTime ? toDate(activity.EndTime).toISOString() : undefined)
                           : "-"}
                       </div>
                     </div>

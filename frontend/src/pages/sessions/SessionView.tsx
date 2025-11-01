@@ -1,3 +1,4 @@
+import { toDate } from "@/lib/utils"
 import React, { useEffect, useState, useCallback } from "react"
 import {
   Card,
@@ -142,7 +143,7 @@ export function SessionView({
   }, [loadSessionProgress, onSessionUpdate])
 
   // Calculate session duration
-  const startTime = new Date(session.StartTime)
+  const startTime = toDate(session.StartTime)
   const currentTime = new Date()
   const durationMs = currentTime.getTime() - startTime.getTime()
   const durationMinutes = Math.floor(durationMs / 60000)

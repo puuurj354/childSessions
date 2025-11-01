@@ -1,3 +1,4 @@
+import { toDate } from "@/lib/utils"
 import React, { useEffect, useState } from "react"
 import {
   Card,
@@ -283,9 +284,9 @@ export function ChildProgressDashboard() {
   const sessionDurations = sessions
     .filter((s) => s.EndTime)
     .map((s) => ({
-      tanggal: new Date(s.StartTime).toLocaleDateString("id-ID"),
+      tanggal: toDate(s.StartTime).toLocaleDateString("id-ID"),
       durasi: Math.round(
-        (new Date(s.EndTime!).getTime() - new Date(s.StartTime).getTime()) /
+        (toDate(s.EndTime!).getTime() - toDate(s.StartTime).getTime()) /
           60000
       ),
     }))
@@ -479,8 +480,8 @@ export function ChildProgressDashboard() {
       if (sessions && Array.isArray(sessions) && sessions.length > 0) {
         sessions.forEach((session, index) => {
           try {
-            const startTime = new Date(session.StartTime)
-            const endTime = session.EndTime ? new Date(session.EndTime) : null
+            const startTime = toDate(session.StartTime)
+            const endTime = session.EndTime ? toDate(session.EndTime) : null
             const duration = endTime
               ? Math.round((endTime.getTime() - startTime.getTime()) / 60000)
               : ""
@@ -507,7 +508,7 @@ export function ChildProgressDashboard() {
       if (rewards && Array.isArray(rewards) && rewards.length > 0) {
         rewards.forEach((reward, index) => {
           try {
-            const rewardTime = new Date(reward.Timestamp)
+            const rewardTime = toDate(reward.Timestamp)
             csvData.push({
               no: sessions.length + index + 1,
               tipe: "REWARD",

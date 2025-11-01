@@ -23,6 +23,7 @@ import {
 import { EventsOn } from "../../wailsjs/runtime/runtime"
 import { model } from "../../wailsjs/go/models"
 import { toast } from "sonner"
+import { toDate } from "@/lib/utils"
 
 interface DashboardStats {
   total_children: number
@@ -451,8 +452,8 @@ export function Dashboard() {
                 {children
                   .sort(
                     (a, b) =>
-                      new Date(b.CreatedAt || 0).getTime() -
-                      new Date(a.CreatedAt || 0).getTime()
+                      toDate(b.CreatedAt).getTime() -
+                      toDate(a.CreatedAt).getTime()
                   )
                   .slice(0, 5)
                   .map((child) => (
@@ -468,7 +469,7 @@ export function Dashboard() {
                       </div>
                       <div className="text-xs text-muted-foreground">
                         {child.CreatedAt
-                          ? new Date(child.CreatedAt).toLocaleDateString(
+                          ? toDate(child.CreatedAt).toLocaleDateString(
                               "id-ID"
                             )
                           : ""}

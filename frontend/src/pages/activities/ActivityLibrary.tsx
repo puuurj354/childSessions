@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react"
+import { toDate } from "@/lib/utils"
 import {
   Card,
   CardContent,
@@ -99,11 +100,11 @@ export function ActivityLibrary() {
     )
     const sortedByDate = [...activitiesData].sort(
       (a, b) =>
-        new Date(b.CreatedAt || 0).getTime() -
-        new Date(a.CreatedAt || 0).getTime()
+        toDate(b.CreatedAt).getTime() -
+        toDate(a.CreatedAt).getTime()
     )
     const lastCreated = sortedByDate[0]?.CreatedAt
-      ? new Date(sortedByDate[0].CreatedAt).toLocaleDateString("id-ID")
+      ? toDate(sortedByDate[0].CreatedAt).toLocaleDateString("id-ID")
       : "Tidak diketahui"
     setActivityStats({
       total_activities: totalActivities,
@@ -256,8 +257,8 @@ export function ActivityLibrary() {
           valueB = (b.Category || "").toLowerCase()
           break
         case "created":
-          valueA = new Date(a.CreatedAt || 0).getTime()
-          valueB = new Date(b.CreatedAt || 0).getTime()
+          valueA = toDate(a.CreatedAt).getTime()
+          valueB = toDate(b.CreatedAt).getTime()
           break
         default:
           valueA = a.Name.toLowerCase()

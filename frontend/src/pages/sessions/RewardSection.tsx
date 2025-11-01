@@ -1,3 +1,4 @@
+import { toDate } from "@/lib/utils"
 import React, { useEffect, useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Award, Star, Gift, Trophy, Plus } from "lucide-react"
@@ -84,7 +85,7 @@ export function RewardSection({ sessionId, childId }: RewardSectionProps) {
   }
 
   const todayRewards = childRewards.filter((reward) => {
-    const rewardDate = new Date(reward.Timestamp).toDateString()
+    const rewardDate = toDate(reward.Timestamp).toDateString()
     const today = new Date().toDateString()
     return rewardDate === today
   })
@@ -251,7 +252,7 @@ export function RewardSection({ sessionId, childId }: RewardSectionProps) {
                     <span className="text-sm">×{reward.Value}</span>
                   </div>
                   <div className="text-xs">
-                    {new Date(reward.Timestamp).toLocaleTimeString("id-ID")}
+                    {toDate(reward.Timestamp).toLocaleTimeString("id-ID")}
                   </div>
                 </div>
               ))}

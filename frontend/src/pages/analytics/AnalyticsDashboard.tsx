@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend,
@@ -15,8 +15,7 @@ import {
   GetChildComparisonStats,
   GetMonthlyReportData,
   GetAllChildren,
-} from '@/wailsjs/go/main/App';
-import { useMemo } from 'react';
+} from '../../../wailsjs/go/main/App';
 
 interface Child {
   ID: number;
@@ -308,7 +307,7 @@ const AnalyticsDashboard: React.FC = () => {
                   <h2 className="text-xl font-semibold text-gray-900 mb-4">Aktivitas Paling Sering</h2>
                   {activityChartData.length > 0 ? (
                     <div className="space-y-3">
-                      {activityChartData.slice(0, 5).map((activity, index) => (
+                      {activityChartData.slice(0, 5).map((activity: any, index: number) => (
                         <div key={index} className="flex items-center justify-between">
                           <span className="text-gray-700 font-medium">{activity.name}</span>
                           <div className="flex gap-4">
