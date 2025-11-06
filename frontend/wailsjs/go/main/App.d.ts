@@ -7,7 +7,11 @@ export function AchieveGoal(arg1:number):Promise<model.Goal>;
 
 export function AddNote(arg1:number,arg2:string,arg3:string):Promise<model.Note>;
 
+export function AddNoteWithCategory(arg1:number,arg2:string,arg3:number):Promise<model.Note>;
+
 export function AddReward(arg1:number,arg2:any,arg3:string,arg4:number,arg5:string):Promise<model.Reward>;
+
+export function AddRewardWithType(arg1:number,arg2:any,arg3:number,arg4:string):Promise<model.Reward>;
 
 export function AutoPauseInactiveActivities(arg1:number,arg2:number):Promise<Array<model.SessionActivity>>;
 
@@ -63,7 +67,11 @@ export function GetAllActivities():Promise<Array<model.Activity>>;
 
 export function GetAllChildren():Promise<Array<model.Child>>;
 
+export function GetAllNoteCategories():Promise<Array<model.NoteCategory>>;
+
 export function GetAllNoteTemplates():Promise<Array<model.NoteTemplate>>;
+
+export function GetAllRewardTypes():Promise<Array<model.RewardType>>;
 
 export function GetChildActivityFrequency(arg1:number):Promise<Record<string, number>>;
 
@@ -91,9 +99,13 @@ export function GetMonthlyReportData(arg1:number,arg2:number,arg3:number):Promis
 
 export function GetMostPopularActivity():Promise<string>;
 
+export function GetNoteCategoryByID(arg1:number):Promise<model.NoteCategory>;
+
 export function GetProgressMetrics(arg1:number):Promise<Record<string, any>>;
 
 export function GetRewardSummary(arg1:number):Promise<Record<string, any>>;
+
+export function GetRewardTypeByID(arg1:number):Promise<model.RewardType>;
 
 export function GetScheduleByID(arg1:number):Promise<model.Schedule>;
 

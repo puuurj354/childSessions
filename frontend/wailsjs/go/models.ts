@@ -98,6 +98,55 @@ export namespace model {
 		    return a;
 		}
 	}
+	export class NoteCategory {
+	    ID: number;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
+	    // Go type: gorm
+	    DeletedAt: any;
+	    Name: string;
+	    Description: string;
+	    Color: string;
+	    Icon: string;
+	    IsActive: boolean;
+	    SortOrder: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new NoteCategory(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ID = source["ID"];
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
+	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
+	        this.Name = source["Name"];
+	        this.Description = source["Description"];
+	        this.Color = source["Color"];
+	        this.Icon = source["Icon"];
+	        this.IsActive = source["IsActive"];
+	        this.SortOrder = source["SortOrder"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class Note {
 	    ID: number;
 	    CreatedAt: time.Time;
@@ -106,6 +155,8 @@ export namespace model {
 	    DeletedAt: any;
 	    SessionID: number;
 	    Session: Session;
+	    NoteCategoryID?: number;
+	    NoteCategory?: NoteCategory;
 	    NoteText: string;
 	    Category: string;
 	    Timestamp: time.Time;
@@ -123,6 +174,8 @@ export namespace model {
 	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
 	        this.SessionID = source["SessionID"];
 	        this.Session = this.convertValues(source["Session"], Session);
+	        this.NoteCategoryID = source["NoteCategoryID"];
+	        this.NoteCategory = this.convertValues(source["NoteCategory"], NoteCategory);
 	        this.NoteText = source["NoteText"];
 	        this.Category = source["Category"];
 	        this.Timestamp = this.convertValues(source["Timestamp"], time.Time);
@@ -204,6 +257,59 @@ export namespace model {
 		    return a;
 		}
 	}
+	export class RewardType {
+	    ID: number;
+	    CreatedAt: time.Time;
+	    UpdatedAt: time.Time;
+	    // Go type: gorm
+	    DeletedAt: any;
+	    Name: string;
+	    DisplayName: string;
+	    Icon: string;
+	    Color: string;
+	    Description: string;
+	    DefaultValue: number;
+	    IsActive: boolean;
+	    SortOrder: number;
+	
+	    static createFrom(source: any = {}) {
+	        return new RewardType(source);
+	    }
+	
+	    constructor(source: any = {}) {
+	        if ('string' === typeof source) source = JSON.parse(source);
+	        this.ID = source["ID"];
+	        this.CreatedAt = this.convertValues(source["CreatedAt"], time.Time);
+	        this.UpdatedAt = this.convertValues(source["UpdatedAt"], time.Time);
+	        this.DeletedAt = this.convertValues(source["DeletedAt"], null);
+	        this.Name = source["Name"];
+	        this.DisplayName = source["DisplayName"];
+	        this.Icon = source["Icon"];
+	        this.Color = source["Color"];
+	        this.Description = source["Description"];
+	        this.DefaultValue = source["DefaultValue"];
+	        this.IsActive = source["IsActive"];
+	        this.SortOrder = source["SortOrder"];
+	    }
+	
+		convertValues(a: any, classs: any, asMap: boolean = false): any {
+		    if (!a) {
+		        return a;
+		    }
+		    if (a.slice && a.map) {
+		        return (a as any[]).map(elem => this.convertValues(elem, classs));
+		    } else if ("object" === typeof a) {
+		        if (asMap) {
+		            for (const key of Object.keys(a)) {
+		                a[key] = new classs(a[key]);
+		            }
+		            return a;
+		        }
+		        return new classs(a);
+		    }
+		    return a;
+		}
+	}
 	export class Reward {
 	    ID: number;
 	    CreatedAt: time.Time;
@@ -214,6 +320,8 @@ export namespace model {
 	    Child: Child;
 	    SessionID?: number;
 	    Session: Session;
+	    RewardTypeID?: number;
+	    RewardType?: RewardType;
 	    Type: string;
 	    Value: number;
 	    Timestamp: time.Time;
@@ -233,6 +341,8 @@ export namespace model {
 	        this.Child = this.convertValues(source["Child"], Child);
 	        this.SessionID = source["SessionID"];
 	        this.Session = this.convertValues(source["Session"], Session);
+	        this.RewardTypeID = source["RewardTypeID"];
+	        this.RewardType = this.convertValues(source["RewardType"], RewardType);
 	        this.Type = source["Type"];
 	        this.Value = source["Value"];
 	        this.Timestamp = this.convertValues(source["Timestamp"], time.Time);
@@ -473,6 +583,7 @@ export namespace model {
 	
 	
 	
+	
 	export class NoteTemplate {
 	    ID: number;
 	    CreatedAt: time.Time;
@@ -516,6 +627,7 @@ export namespace model {
 		    return a;
 		}
 	}
+	
 	
 	export class Schedule {
 	    ID: number;

@@ -10,8 +10,16 @@ export function AddNote(arg1, arg2, arg3) {
   return window['go']['main']['App']['AddNote'](arg1, arg2, arg3);
 }
 
+export function AddNoteWithCategory(arg1, arg2, arg3) {
+  return window['go']['main']['App']['AddNoteWithCategory'](arg1, arg2, arg3);
+}
+
 export function AddReward(arg1, arg2, arg3, arg4, arg5) {
   return window['go']['main']['App']['AddReward'](arg1, arg2, arg3, arg4, arg5);
+}
+
+export function AddRewardWithType(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['AddRewardWithType'](arg1, arg2, arg3, arg4);
 }
 
 export function AutoPauseInactiveActivities(arg1, arg2) {
@@ -122,8 +130,16 @@ export function GetAllChildren() {
   return window['go']['main']['App']['GetAllChildren']();
 }
 
+export function GetAllNoteCategories() {
+  return window['go']['main']['App']['GetAllNoteCategories']();
+}
+
 export function GetAllNoteTemplates() {
   return window['go']['main']['App']['GetAllNoteTemplates']();
+}
+
+export function GetAllRewardTypes() {
+  return window['go']['main']['App']['GetAllRewardTypes']();
 }
 
 export function GetChildActivityFrequency(arg1) {
@@ -178,12 +194,20 @@ export function GetMostPopularActivity() {
   return window['go']['main']['App']['GetMostPopularActivity']();
 }
 
+export function GetNoteCategoryByID(arg1) {
+  return window['go']['main']['App']['GetNoteCategoryByID'](arg1);
+}
+
 export function GetProgressMetrics(arg1) {
   return window['go']['main']['App']['GetProgressMetrics'](arg1);
 }
 
 export function GetRewardSummary(arg1) {
   return window['go']['main']['App']['GetRewardSummary'](arg1);
+}
+
+export function GetRewardTypeByID(arg1) {
+  return window['go']['main']['App']['GetRewardTypeByID'](arg1);
 }
 
 export function GetScheduleByID(arg1) {

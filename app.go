@@ -442,6 +442,23 @@ func (a *App) DeleteNoteTemplate(templateID uint) error {
 	return nil
 }
 
+// ==================== NOTE CATEGORIES ====================
+
+// GetAllNoteCategories retrieves all active note categories
+func (a *App) GetAllNoteCategories() ([]model.NoteCategory, error) {
+	return a.noteService.GetAllNoteCategories()
+}
+
+// GetNoteCategoryByID retrieves a specific note category
+func (a *App) GetNoteCategoryByID(id uint) (*model.NoteCategory, error) {
+	return a.noteService.GetNoteCategoryByID(id)
+}
+
+// AddNoteWithCategory creates a note with a category ID
+func (a *App) AddNoteWithCategory(sessionID uint, noteText string, categoryID uint) (*model.Note, error) {
+	return a.noteService.CreateNoteWithCategory(sessionID, noteText, categoryID)
+}
+
 // ===== REWARD MANAGEMENT =====
 
 // AddReward gives a reward to a child
@@ -547,6 +564,40 @@ func (a *App) GetRewardSummary(childID uint) (map[string]interface{}, error) {
 	}
 
 	return summary, nil
+}
+
+// ==================== REWARD TYPES ====================
+
+// GetAllRewardTypes retrieves all active reward types
+func (a *App) GetAllRewardTypes() ([]model.RewardType, error) {
+	return a.rewardService.GetAllRewardTypes()
+}
+
+// GetRewardTypeByID retrieves a specific reward type
+func (a *App) GetRewardTypeByID(id uint) (*model.RewardType, error) {
+	return a.rewardService.GetRewardTypeByID(id)
+}
+
+// AddRewardWithType gives a reward using a reward type ID
+func (a *App) AddRewardWithType(childID uint, sessionID *uint, rewardTypeID uint, notes string) (*model.Reward, error) {
+	reward, err := a.rewardService.GiveRewardWithType(childID, sessionID, rewardTypeID, notes)
+	if err != nil {
+		return nil, err
+	}
+
+	// Emit real-time event
+	runtime.EventsEmit(a.ctx, "reward_updated", map[string]interface{}{
+		"action":         "added",
+		"reward_id":      reward.ID,
+		"child_id":       reward.ChildID,
+		"session_id":     reward.SessionID,
+		"reward_type_id": reward.RewardTypeID,
+		"type":           reward.Type,
+		"value":          reward.Value,
+		"timestamp":      time.Now(),
+	})
+
+	return reward, nil
 }
 
 // ===== GOAL MANAGEMENT =====

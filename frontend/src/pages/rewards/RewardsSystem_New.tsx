@@ -35,8 +35,9 @@ import {
   GetAllChildren,
   GetChildRewards,
   GetRewardSummary,
-  AddReward,
+  AddRewardWithType,
   DeleteReward,
+  GetAllRewardTypes,
 } from "../../../wailsjs/go/main/App"
 import { EventsOn } from "../../../wailsjs/runtime/runtime"
 import { model } from "../../../wailsjs/go/models"
@@ -47,6 +48,7 @@ export function RewardsSystem() {
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null)
   const [childRewards, setChildRewards] = useState<model.Reward[]>([])
   const [rewardSummary, setRewardSummary] = useState<any | null>(null)
+  const [rewardTypes, setRewardTypes] = useState<any[]>([])
   const [expandedSections, setExpandedSections] = useState<{
     [key: string]: boolean
   }>({
@@ -60,8 +62,7 @@ export function RewardsSystem() {
   const [filterType, setFilterType] = useState<string>("all")
   const [showAddReward, setShowAddReward] = useState(false)
   const [rewardForm, setRewardForm] = useState({
-    type: "Sticker",
-    value: 1,
+    rewardTypeId: null as number | null,
     notes: "",
     sessionId: null as number | null,
   })
@@ -149,30 +150,53 @@ export function RewardsSystem() {
     }
   }
 
+  const loadRewardTypes = async () => {
+    try {
+      const data = await GetAllRewardTypes()
+      setRewardTypes(data)
+      if (data && data.length > 0) {
+        setRewardForm((prev) => ({ ...prev, rewardTypeId: data[0].ID }))
+      }
+    } catch (err) {
+      console.error("Error loading reward types:", err)
+      toast.error("Gagal memuat jenis reward")
+    }
+  }
+
+  useEffect(() => {
+    loadRewardTypes()
+  }, [])
+
   const handleAddReward = async () => {
-    if (!selectedChildId) return
+    if (!selectedChildId || !rewardForm.rewardTypeId) {
+      toast.error("Data tidak lengkap", {
+        description: "Pastikan jenis reward telah dipilih",
+      })
+      return
+    }
 
     try {
       setSavingReward(true)
-      await AddReward(
+      await AddRewardWithType(
         selectedChildId,
         rewardForm.sessionId,
-        rewardForm.type,
-        rewardForm.value,
+        rewardForm.rewardTypeId,
         rewardForm.notes
       )
 
       setShowAddReward(false)
       setRewardForm({
-        type: "Sticker",
-        value: 1,
+        rewardTypeId: rewardTypes.length > 0 ? rewardTypes[0].ID : null,
         notes: "",
         sessionId: null,
       })
 
       // Data will refresh via event listener
+      const selectedType = rewardTypes.find(
+        (t) => t.ID === rewardForm.rewardTypeId
+      )
       toast.success("Reward Berhasil Diberikan!", {
-        description: `${rewardForm.type} (${rewardForm.value}x) telah diberikan`,
+        description: `${selectedType?.DisplayName || "Reward"} telah diberikan`,
       })
     } catch (err) {
       console.error("Error adding reward:", err)
@@ -203,33 +227,7 @@ export function RewardsSystem() {
     }
   }
 
-  const rewardTypes = [
-    {
-      value: "Sticker",
-      label: "Sticker ⭐",
-      icon: Star,
-      color: "text-yellow-500",
-    },
-    {
-      value: "Bintang",
-      label: "Bintang 🏆",
-      icon: Trophy,
-      color: "text-blue-500",
-    },
-    { value: "Poin", label: "Poin 🎯", icon: Target, color: "text-green-500" },
-    {
-      value: "Hadiah Kecil",
-      label: "Hadiah Kecil 🎁",
-      icon: Gift,
-      color: "text-purple-500",
-    },
-    {
-      value: "Sertifikat",
-      label: "Sertifikat 📜",
-      icon: Award,
-      color: "text-orange-500",
-    },
-  ]
+  // Removed old hardcoded rewardTypes - now using database
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
@@ -349,34 +347,21 @@ export function RewardsSystem() {
                   Jenis Reward
                 </label>
                 <select
-                  value={rewardForm.type}
+                  value={rewardForm.rewardTypeId || ""}
                   onChange={(e) =>
-                    setRewardForm({ ...rewardForm, type: e.target.value })
+                    setRewardForm({
+                      ...rewardForm,
+                      rewardTypeId: parseInt(e.target.value),
+                    })
                   }
                   className="w-full border rounded-md p-2"
                 >
                   {rewardTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
+                    <option key={type.ID} value={type.ID}>
+                      {type.DisplayName} ({type.DefaultValue} poin)
                     </option>
                   ))}
                 </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium mb-2">Jumlah</label>
-                <Input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={rewardForm.value}
-                  onChange={(e) =>
-                    setRewardForm({
-                      ...rewardForm,
-                      value: parseInt(e.target.value) || 1,
-                    })
-                  }
-                />
               </div>
 
               <div>

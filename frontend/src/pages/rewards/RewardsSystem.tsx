@@ -35,18 +35,20 @@ import {
   GetAllChildren,
   GetChildRewards,
   GetRewardSummary,
-  AddReward,
+  AddRewardWithType,
   DeleteReward,
+  GetAllRewardTypes,
 } from "../../../wailsjs/go/main/App"
 import { EventsOn } from "../../../wailsjs/runtime/runtime"
 import { model } from "../../../wailsjs/go/models"
 import { toast } from "sonner"
 
 export function RewardsSystem() {
-  const [children, setChildren] = useState<model.Child[]>([])
+  const [children, setChildren] = useState<any[]>([])
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null)
-  const [childRewards, setChildRewards] = useState<model.Reward[]>([])
-  const [rewardSummary, setRewardSummary] = useState<any | null>(null)
+  const [childRewards, setChildRewards] = useState<any[]>([])
+  const [rewardSummary, setRewardSummary] = useState<any>(null)
+  const [rewardTypes, setRewardTypes] = useState<any[]>([])
   const [expandedSections, setExpandedSections] = useState<{
     [key: string]: boolean
   }>({
@@ -60,8 +62,7 @@ export function RewardsSystem() {
   const [filterType, setFilterType] = useState<string>("all")
   const [showAddReward, setShowAddReward] = useState(false)
   const [rewardForm, setRewardForm] = useState({
-    type: "Sticker",
-    value: 1,
+    rewardTypeId: null as number | null,
     notes: "",
     sessionId: null as number | null,
   })
@@ -70,6 +71,7 @@ export function RewardsSystem() {
 
   useEffect(() => {
     loadChildren()
+    loadRewardTypes()
 
     // Listen for real-time reward updates
     const unsubscribeRewardUpdate = EventsOn("reward_updated", (data: any) => {
@@ -106,18 +108,27 @@ export function RewardsSystem() {
 
   const loadChildren = async () => {
     try {
-      setLoading(true)
       const data = await GetAllChildren()
       setChildren(data)
-      if (data.length > 0 && !selectedChildId) {
+      if (data && data.length > 0) {
         setSelectedChildId(data[0].ID)
       }
-      setError(null)
     } catch (err) {
       console.error("Error loading children:", err)
       setError("Gagal memuat daftar anak")
-    } finally {
-      setLoading(false)
+    }
+  }
+
+  const loadRewardTypes = async () => {
+    try {
+      const data = await GetAllRewardTypes()
+      setRewardTypes(data)
+      if (data && data.length > 0) {
+        setRewardForm(prev => ({ ...prev, rewardTypeId: data[0].ID }))
+      }
+    } catch (err) {
+      console.error("Error loading reward types:", err)
+      setError("Gagal memuat tipe reward")
     }
   }
 
@@ -150,29 +161,30 @@ export function RewardsSystem() {
   }
 
   const handleAddReward = async () => {
-    if (!selectedChildId) return
+    if (!selectedChildId || !rewardForm.rewardTypeId) return
 
     try {
       setSavingReward(true)
-      await AddReward(
+      await AddRewardWithType(
         selectedChildId,
         rewardForm.sessionId,
-        rewardForm.type,
-        rewardForm.value,
+        rewardForm.rewardTypeId,
         rewardForm.notes
       )
 
       setShowAddReward(false)
       setRewardForm({
-        type: "Sticker",
-        value: 1,
+        rewardTypeId: rewardTypes.length > 0 ? rewardTypes[0].ID : null,
         notes: "",
         sessionId: null,
       })
 
       // Data will refresh via event listener
+      const selectedType = rewardTypes.find(
+        (t) => t.ID === rewardForm.rewardTypeId
+      )
       toast.success("Reward Berhasil Diberikan!", {
-        description: `${rewardForm.type} (${rewardForm.value}x) telah diberikan`,
+        description: `${selectedType?.DisplayName || "Reward"} telah diberikan`,
       })
     } catch (err) {
       console.error("Error adding reward:", err)
@@ -203,33 +215,8 @@ export function RewardsSystem() {
     }
   }
 
-  const rewardTypes = [
-    {
-      value: "Sticker",
-      label: "Sticker ⭐",
-      icon: Star,
-      color: "text-yellow-500",
-    },
-    {
-      value: "Bintang",
-      label: "Bintang 🏆",
-      icon: Trophy,
-      color: "text-blue-500",
-    },
-    { value: "Poin", label: "Poin 🎯", icon: Target, color: "text-green-500" },
-    {
-      value: "Hadiah Kecil",
-      label: "Hadiah Kecil 🎁",
-      icon: Gift,
-      color: "text-purple-500",
-    },
-    {
-      value: "Sertifikat",
-      label: "Sertifikat 📜",
-      icon: Award,
-      color: "text-orange-500",
-    },
-  ]
+  // Removed old hardcoded rewardTypes - now using database
+
 
   const toggleSection = (section: string) => {
     setExpandedSections((prev) => ({
@@ -349,37 +336,18 @@ export function RewardsSystem() {
                   Jenis Reward
                 </label>
                 <select
-                  value={rewardForm.type}
+                  value={rewardForm.rewardTypeId || ""}
                   onChange={(e) =>
-                    setRewardForm({ ...rewardForm, type: e.target.value })
+                    setRewardForm({ ...rewardForm, rewardTypeId: parseInt(e.target.value) })
                   }
                   className="w-full border rounded-md p-2"
                 >
                   {rewardTypes.map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.label}
+                    <option key={type.ID} value={type.ID}>
+                      {type.DisplayName} ({type.DefaultValue} poin)
                     </option>
                   ))}
                 </select>
-              </div>
-
-              <div className="flex flex-col sm:flex-row gap-2">
-                <label className="block text-sm font-medium mb-1 sm:mb-2">
-                  Jumlah
-                </label>
-                <Input
-                  type="number"
-                  min="1"
-                  max="10"
-                  value={rewardForm.value}
-                  onChange={(e) =>
-                    setRewardForm({
-                      ...rewardForm,
-                      value: parseInt(e.target.value) || 1,
-                    })
-                  }
-                  className="w-full"
-                />
               </div>
 
               <div className="flex flex-col sm:flex-row gap-2">
@@ -663,15 +631,11 @@ export function RewardsSystem() {
                                 {monthYear}
                               </h4>
                               <span className="bg-gray-100 text-gray-600 text-xs px-2 py-1 rounded-full">
-                                {rewards.length} reward
+                                {(rewards as model.Reward[]).length} reward
                               </span>
                             </div>
                             <div className="grid gap-3">
-                              {rewards.map((reward) => {
-                                const rewardType = rewardTypes.find(
-                                  (r) => r.value === reward.Type
-                                )
-                                const IconComponent = rewardType?.icon || Award
+                              {(rewards as model.Reward[]).map((reward) => {
                                 return (
                                   <Card
                                     key={reward.ID}
@@ -685,7 +649,7 @@ export function RewardsSystem() {
                                               reward.Type
                                             )}`}
                                           >
-                                            <IconComponent size={20} />
+                                            <Award size={20} />
                                           </div>
                                           <div>
                                             <p className="font-semibold text-lg">

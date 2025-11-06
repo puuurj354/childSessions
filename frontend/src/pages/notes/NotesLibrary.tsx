@@ -23,6 +23,7 @@ import {
   CreateNoteTemplate,
   UpdateNoteTemplate,
   DeleteNoteTemplate,
+  GetAllNoteCategories,
 } from "../../../wailsjs/go/main/App"
 import { model } from "../../../wailsjs/go/models"
 
@@ -38,22 +39,25 @@ export function NotesLibrary() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [highlightIndex, setHighlightIndex] = useState<number | null>(null)
+  const [noteCategories, setNoteCategories] = useState<any[]>([])
   const textareaRef = useRef<HTMLTextAreaElement>(null)
-
-  const categories = [
-    "Perilaku",
-    "Kemajuan",
-    "Tantangan",
-    "Komunikasi",
-    "Motorik",
-    "Sosial",
-    "Emosi",
-    "Lainnya",
-  ]
 
   useEffect(() => {
     loadTemplates()
+    loadNoteCategories()
   }, [])
+
+  const loadNoteCategories = async () => {
+    try {
+      const data = await GetAllNoteCategories()
+      setNoteCategories(data)
+      if (data && data.length > 0 && !categoryHint) {
+        setCategoryHint(data[0].Name)
+      }
+    } catch (err) {
+      console.error("Error loading note categories:", err)
+    }
+  }
 
   const loadTemplates = async () => {
     try {
@@ -280,9 +284,9 @@ export function NotesLibrary() {
                   className="w-full border rounded-md p-2"
                 >
                   <option value="">Pilih kategori...</option>
-                  {categories.map((cat) => (
-                    <option key={cat} value={cat}>
-                      {cat}
+                  {noteCategories.map((cat) => (
+                    <option key={cat.ID} value={cat.Name}>
+                      {cat.Description}
                     </option>
                   ))}
                 </select>
