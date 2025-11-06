@@ -31,6 +31,10 @@ export function CreateRecurringSchedules(arg1:number,arg2:any,arg3:time.Time,arg
 
 export function CreateSchedule(arg1:number,arg2:any,arg3:time.Time,arg4:string,arg5:string,arg6:string,arg7:time.Time,arg8:number):Promise<model.Schedule>;
 
+export function CreateSessionFromTemplate(arg1:number,arg2:number,arg3:string,arg4:string):Promise<model.Session>;
+
+export function CreateSessionTemplate(arg1:string,arg2:string,arg3:string,arg4:number,arg5:string,arg6:string,arg7:string,arg8:string,arg9:string,arg10:number,arg11:number,arg12:string,arg13:string,arg14:string):Promise<model.SessionTemplate>;
+
 export function DeleteActivity(arg1:number):Promise<void>;
 
 export function DeleteChild(arg1:number):Promise<void>;
@@ -42,6 +46,8 @@ export function DeleteNoteTemplate(arg1:number):Promise<void>;
 export function DeleteReward(arg1:number):Promise<void>;
 
 export function DeleteSchedule(arg1:number):Promise<void>;
+
+export function DeleteSessionTemplate(arg1:number):Promise<void>;
 
 export function EndActivityInSession(arg1:number,arg2:string):Promise<model.SessionActivity>;
 
@@ -72,6 +78,8 @@ export function GetAllNoteCategories():Promise<Array<model.NoteCategory>>;
 export function GetAllNoteTemplates():Promise<Array<model.NoteTemplate>>;
 
 export function GetAllRewardTypes():Promise<Array<model.RewardType>>;
+
+export function GetAllSessionTemplates():Promise<Array<model.SessionTemplate>>;
 
 export function GetChildActivityFrequency(arg1:number):Promise<Record<string, number>>;
 
@@ -125,7 +133,13 @@ export function GetSessionProgress(arg1:number):Promise<Record<string, any>>;
 
 export function GetSessionStatistics(arg1:number,arg2:number):Promise<Record<string, any>>;
 
+export function GetSessionTemplateByID(arg1:number):Promise<model.SessionTemplate>;
+
+export function GetSessionTemplatesByCategory(arg1:string):Promise<Array<model.SessionTemplate>>;
+
 export function GetSessionsByChild(arg1:number):Promise<Array<model.Session>>;
+
+export function GetTemplateCategories():Promise<Array<string>>;
 
 export function GetTodaySchedules(arg1:number):Promise<Array<model.Schedule>>;
 
@@ -138,6 +152,8 @@ export function Greet(arg1:string):Promise<string>;
 export function LogFlashcardResponse(arg1:number,arg2:number,arg3:string,arg4:string):Promise<model.SessionFlashcard>;
 
 export function OpenFileInExplorer(arg1:string):Promise<void>;
+
+export function SearchSessionTemplates(arg1:string):Promise<Array<model.SessionTemplate>>;
 
 export function ShowErrorNotification(arg1:string,arg2:string):Promise<void>;
 
@@ -160,5 +176,7 @@ export function UpdateNoteTemplate(arg1:number,arg2:string,arg3:string,arg4:stri
 export function UpdateSchedule(arg1:number,arg2:any,arg3:time.Time,arg4:string,arg5:string,arg6:string,arg7:number):Promise<model.Schedule>;
 
 export function UpdateSessionSummaryNotes(arg1:number,arg2:string):Promise<void>;
+
+export function UpdateSessionTemplate(arg1:number,arg2:string,arg3:string,arg4:string,arg5:number,arg6:string,arg7:string,arg8:string,arg9:string,arg10:number,arg11:number,arg12:string,arg13:string,arg14:string):Promise<void>;
 
 export function ValidateSession(arg1:number):Promise<boolean>;
