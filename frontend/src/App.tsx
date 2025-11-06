@@ -28,7 +28,7 @@ function App() {
       case "sessions":
         return <SessionManager />
       case "templates":
-        return <SessionTemplates />
+        return <SessionTemplates setActivePage={setActivePage} />
       case "activities":
         return <ActivityLibrary />
       case "progress":

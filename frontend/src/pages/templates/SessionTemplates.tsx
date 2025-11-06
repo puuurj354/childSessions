@@ -58,7 +58,12 @@ const getCategoryColor = (category: string) => {
   }
 }
 
-export function SessionTemplates() {
+interface SessionTemplatesProps {
+  setActivePage?: (page: string) => void
+  onTemplateSelect?: (template: model.SessionTemplate, childId: number) => void
+}
+
+export function SessionTemplates({ setActivePage, onTemplateSelect }: SessionTemplatesProps) {
   const [templates, setTemplates] = useState<model.SessionTemplate[]>([])
   const [categories, setCategories] = useState<string[]>([])
   const [searchTerm, setSearchTerm] = useState("")
@@ -67,8 +72,10 @@ export function SessionTemplates() {
   const [editingTemplate, setEditingTemplate] = useState<model.SessionTemplate | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [children, setChildren] = useState<model.Child[]>([])
+  const [showChildSelector, setShowChildSelector] = useState(false)
+  const [selectedTemplateForSession, setSelectedTemplateForSession] = useState<model.SessionTemplate | null>(null)
   const [isCreatingSession, setIsCreatingSession] = useState(false)
-  const [sessionCreationTemplate, setSessionCreationTemplate] = useState<model.SessionTemplate | null>(null)
 
   const [templateForm, setTemplateForm] = useState({
     name: "",
@@ -89,6 +96,7 @@ export function SessionTemplates() {
   useEffect(() => {
     loadTemplates()
     loadCategories()
+    loadChildren()
   }, [])
 
   useEffect(() => {
@@ -125,6 +133,15 @@ export function SessionTemplates() {
       setCategories(data)
     } catch (err) {
       console.error("Error loading categories:", err)
+    }
+  }
+
+  const loadChildren = async () => {
+    try {
+      const data = await GetAllChildren()
+      setChildren(data)
+    } catch (err) {
+      console.error("Error loading children:", err)
     }
   }
 
@@ -269,9 +286,42 @@ export function SessionTemplates() {
   }
 
   const handleUseTemplate = (template: model.SessionTemplate) => {
-    setSessionCreationTemplate(template)
-    setIsCreatingSession(true)
-    toast.success(`Template "${template.Name}" dipilih untuk sesi baru`)
+    setSelectedTemplateForSession(template)
+    setShowChildSelector(true)
+  }
+
+  const handleCreateSessionFromTemplate = async (childId: number) => {
+    if (!selectedTemplateForSession) return
+
+    try {
+      setIsCreatingSession(true)
+      
+      // If callback is provided, use it
+      if (onTemplateSelect) {
+        onTemplateSelect(selectedTemplateForSession, childId)
+        setShowChildSelector(false)
+        setSelectedTemplateForSession(null)
+      } else {
+        // Otherwise navigate to sessions page with template data
+        if (setActivePage) {
+          // Store template data in localStorage for SessionManager to use
+          sessionStorage.setItem('templateForNewSession', JSON.stringify({
+            template: selectedTemplateForSession,
+            childId: childId
+          }))
+          setActivePage('sessions')
+          setShowChildSelector(false)
+          setSelectedTemplateForSession(null)
+        }
+      }
+      
+      toast.success(`Sesi dari template "${selectedTemplateForSession.Name}" sedang dibuat...`)
+    } catch (err) {
+      console.error("Error creating session from template:", err)
+      toast.error("Gagal membuat sesi dari template")
+    } finally {
+      setIsCreatingSession(false)
+    }
   }
 
   return (
@@ -604,17 +654,15 @@ export function SessionTemplates() {
       )}
 
       {/* Template Session Creation Modal */}
-      {isCreatingSession && sessionCreationTemplate && (
+      {showChildSelector && selectedTemplateForSession && (
         <TemplateSessionModal 
-          template={sessionCreationTemplate}
+          template={selectedTemplateForSession}
           onClose={() => {
-            setIsCreatingSession(false)
-            setSessionCreationTemplate(null)
+            setShowChildSelector(false)
+            setSelectedTemplateForSession(null)
           }}
-          onSuccess={() => {
-            setIsCreatingSession(false)
-            setSessionCreationTemplate(null)
-            toast.success("Sesi berhasil dibuat dari template!")
+          onSuccess={(childId: number) => {
+            handleCreateSessionFromTemplate(childId)
           }}
         />
       )}
@@ -630,7 +678,7 @@ function TemplateSessionModal({
 }: { 
   template: model.SessionTemplate
   onClose: () => void
-  onSuccess: () => void
+  onSuccess: (childId: number) => void
 }) {
   const [children, setChildren] = useState<model.Child[]>([])
   const [selectedChildId, setSelectedChildId] = useState<number | null>(null)
@@ -661,7 +709,7 @@ function TemplateSessionModal({
       const currentTime = new Date().toISOString()
       await CreateSessionFromTemplate(template.ID, selectedChildId, currentTime, "therapist")
       toast.success(`Sesi "${template.Name}" berhasil dibuat!`)
-      onSuccess()
+      onSuccess(selectedChildId)
     } catch (err) {
       console.error("Error creating session from template:", err)
       toast.error("Gagal membuat sesi dari template")

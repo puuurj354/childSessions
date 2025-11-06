@@ -77,6 +77,25 @@ export function SessionManager() {
 
   // Real-time event listeners
   useEffect(() => {
+    // Check if there's template data in sessionStorage from template selection
+    const templateData = sessionStorage.getItem('templateForNewSession')
+    if (templateData) {
+      try {
+        const { childId } = JSON.parse(templateData)
+        if (childId) {
+          setSelectedChildId(childId)
+          toast.info("Template sesi siap digunakan untuk anak yang dipilih")
+        }
+        // Clear after reading
+        sessionStorage.removeItem('templateForNewSession')
+      } catch (err) {
+        console.error("Error parsing template data:", err)
+      }
+    }
+  }, [])
+
+  // Real-time event listeners
+  useEffect(() => {
     loadChildren()
 
     const unsubscribeSessionStarted = EventsOn(
