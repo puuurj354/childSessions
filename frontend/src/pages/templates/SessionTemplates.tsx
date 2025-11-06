@@ -23,6 +23,7 @@ import {
   Copy,
   Play,
   Filter,
+  CheckCircle2,
 } from "lucide-react"
 import {
   GetAllSessionTemplates,
@@ -32,9 +33,30 @@ import {
   DeleteSessionTemplate,
   SearchSessionTemplates,
   CreateSessionFromTemplate,
+  GetAllChildren,
 } from "../../../wailsjs/go/main/App"
 import { model } from "../../../wailsjs/go/models"
+import { toDate } from "@/lib/utils"
 import { toast } from "sonner"
+
+// Helper functions
+const getCategoryIcon = (category: string) => {
+  switch (category) {
+    case "assessment": return <Target className="h-4 w-4" />
+    case "social": return <Users className="h-4 w-4" />
+    case "behavioral": return <Settings className="h-4 w-4" />
+    default: return <BookOpen className="h-4 w-4" />
+  }
+}
+
+const getCategoryColor = (category: string) => {
+  switch (category) {
+    case "assessment": return "text-blue-600 bg-blue-50"
+    case "social": return "text-green-600 bg-green-50"
+    case "behavioral": return "text-purple-600 bg-purple-50"
+    default: return "text-gray-600 bg-gray-50"
+  }
+}
 
 export function SessionTemplates() {
   const [templates, setTemplates] = useState<model.SessionTemplate[]>([])
@@ -45,6 +67,8 @@ export function SessionTemplates() {
   const [editingTemplate, setEditingTemplate] = useState<model.SessionTemplate | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [isCreatingSession, setIsCreatingSession] = useState(false)
+  const [sessionCreationTemplate, setSessionCreationTemplate] = useState<model.SessionTemplate | null>(null)
 
   const [templateForm, setTemplateForm] = useState({
     name: "",
@@ -244,22 +268,10 @@ export function SessionTemplates() {
     }
   }
 
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case "assessment": return <Target className="h-4 w-4" />
-      case "social": return <Users className="h-4 w-4" />
-      case "behavioral": return <Settings className="h-4 w-4" />
-      default: return <BookOpen className="h-4 w-4" />
-    }
-  }
-
-  const getCategoryColor = (category: string) => {
-    switch (category) {
-      case "assessment": return "text-blue-600 bg-blue-50"
-      case "social": return "text-green-600 bg-green-50"
-      case "behavioral": return "text-purple-600 bg-purple-50"
-      default: return "text-gray-600 bg-gray-50"
-    }
+  const handleUseTemplate = (template: model.SessionTemplate) => {
+    setSessionCreationTemplate(template)
+    setIsCreatingSession(true)
+    toast.success(`Template "${template.Name}" dipilih untuk sesi baru`)
   }
 
   return (
@@ -409,7 +421,11 @@ export function SessionTemplates() {
                       <Copy size={12} className="mr-1" />
                       Duplikasi
                     </Button>
-                    <Button size="sm" className="text-xs">
+                    <Button 
+                      size="sm" 
+                      className="text-xs"
+                      onClick={() => handleUseTemplate(template)}
+                    >
                       <Play size={12} className="mr-1" />
                       Gunakan
                     </Button>
@@ -586,6 +602,168 @@ export function SessionTemplates() {
           </Card>
         </div>
       )}
+
+      {/* Template Session Creation Modal */}
+      {isCreatingSession && sessionCreationTemplate && (
+        <TemplateSessionModal 
+          template={sessionCreationTemplate}
+          onClose={() => {
+            setIsCreatingSession(false)
+            setSessionCreationTemplate(null)
+          }}
+          onSuccess={() => {
+            setIsCreatingSession(false)
+            setSessionCreationTemplate(null)
+            toast.success("Sesi berhasil dibuat dari template!")
+          }}
+        />
+      )}
+    </div>
+  )
+}
+
+// Template Session Creation Modal Component
+function TemplateSessionModal({ 
+  template, 
+  onClose, 
+  onSuccess 
+}: { 
+  template: model.SessionTemplate
+  onClose: () => void
+  onSuccess: () => void
+}) {
+  const [children, setChildren] = useState<model.Child[]>([])
+  const [selectedChildId, setSelectedChildId] = useState<number | null>(null)
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    loadChildren()
+  }, [])
+
+  const loadChildren = async () => {
+    try {
+      const data = await GetAllChildren()
+      setChildren(data)
+    } catch (err) {
+      console.error("Error loading children:", err)
+      toast.error("Gagal memuat data anak")
+    }
+  }
+
+  const handleCreateSession = async () => {
+    if (!selectedChildId) {
+      toast.error("Pilih anak terlebih dahulu")
+      return
+    }
+
+    try {
+      setLoading(true)
+      const currentTime = new Date().toISOString()
+      await CreateSessionFromTemplate(template.ID, selectedChildId, currentTime, "therapist")
+      toast.success(`Sesi "${template.Name}" berhasil dibuat!`)
+      onSuccess()
+    } catch (err) {
+      console.error("Error creating session from template:", err)
+      toast.error("Gagal membuat sesi dari template")
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <Card className="w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BookOpen className="text-blue-600" />
+            Buat Sesi dari Template
+          </CardTitle>
+          <CardDescription>
+            Membuat sesi baru menggunakan template: <strong>{template.Name}</strong>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Template Info */}
+          <div className="p-4 bg-blue-50 rounded-lg">
+            <h3 className="font-semibold text-blue-900 mb-2">{template.Name}</h3>
+            <p className="text-sm text-blue-700 mb-3">{template.Description}</p>
+            <div className="flex flex-wrap gap-3 text-xs">
+              <div className="flex items-center gap-1">
+                <Clock size={12} />
+                <span>{template.DurationMinutes} menit</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <Users size={12} />
+                <span>Usia {template.AgeRangeMin}-{template.AgeRangeMax} tahun</span>
+              </div>
+              <div className={`flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(template.Category)}`}>
+                {getCategoryIcon(template.Category)}
+                {template.Category.charAt(0).toUpperCase() + template.Category.slice(1)}
+              </div>
+            </div>
+          </div>
+
+          {/* Child Selection */}
+          <div>
+            <label className="block text-sm font-medium mb-3">
+              Pilih Anak untuk Sesi Ini *
+            </label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {children.map((child) => (
+                <Card 
+                  key={child.ID}
+                  className={`cursor-pointer transition-all ${
+                    selectedChildId === child.ID 
+                      ? 'border-blue-500 bg-blue-50' 
+                      : 'hover:border-gray-300'
+                  }`}
+                  onClick={() => setSelectedChildId(child.ID)}
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-bold">
+                        {child.Name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-medium">{child.Name}</h4>
+                        <p className="text-sm text-gray-600">
+                          {child.Gender} • Umur: {
+                            child.DateOfBirth ? 
+                              new Date().getFullYear() - toDate(child.DateOfBirth).getFullYear()
+                              : 'N/A'
+                          } tahun
+                        </p>
+                      </div>
+                      {selectedChildId === child.ID && (
+                        <div className="text-blue-600">
+                          <CheckCircle2 size={20} />
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-end gap-3 pt-4 border-t">
+            <Button
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Batal
+            </Button>
+            <Button
+              onClick={handleCreateSession}
+              disabled={!selectedChildId || loading}
+            >
+              {loading ? "Membuat Sesi..." : "Buat Sesi"}
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
