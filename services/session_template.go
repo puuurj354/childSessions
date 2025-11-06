@@ -3,6 +3,7 @@ package services
 import (
 	"encoding/json"
 	"fmt"
+	"time"
 
 	"gorm.io/gorm"
 
@@ -117,9 +118,17 @@ func (s *SessionTemplateService) CreateSessionFromTemplate(templateID uint, chil
 		}
 	}
 
+	// Parse start time
+	parsedStartTime, err := time.Parse(time.RFC3339, startTime)
+	if err != nil {
+		// If parsing fails, use current time
+		parsedStartTime = time.Now()
+	}
+
 	// Create session with basic template data
 	session := model.Session{
 		ChildID:         childID,
+		StartTime:       parsedStartTime,
 		DurationMinutes: template.DurationMinutes,
 		SummaryNotes:    fmt.Sprintf("Session based on template: %s\n\nObjectives: %s\n\nInstructions:\n%s\n\nMaterials: %s", template.Name, template.Objectives, template.Instructions, template.Materials),
 	}
