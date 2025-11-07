@@ -58,6 +58,14 @@ export function CreateSchedule(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8) {
   return window['go']['main']['App']['CreateSchedule'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8);
 }
 
+export function CreateSessionFromTemplate(arg1, arg2, arg3, arg4) {
+  return window['go']['main']['App']['CreateSessionFromTemplate'](arg1, arg2, arg3, arg4);
+}
+
+export function CreateSessionTemplate(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14) {
+  return window['go']['main']['App']['CreateSessionTemplate'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
+}
+
 export function DeleteActivity(arg1) {
   return window['go']['main']['App']['DeleteActivity'](arg1);
 }
@@ -80,6 +88,10 @@ export function DeleteReward(arg1) {
 
 export function DeleteSchedule(arg1) {
   return window['go']['main']['App']['DeleteSchedule'](arg1);
+}
+
+export function DeleteSessionTemplate(arg1) {
+  return window['go']['main']['App']['DeleteSessionTemplate'](arg1);
 }
 
 export function EndActivityInSession(arg1, arg2) {
@@ -140,6 +152,10 @@ export function GetAllNoteTemplates() {
 
 export function GetAllRewardTypes() {
   return window['go']['main']['App']['GetAllRewardTypes']();
+}
+
+export function GetAllSessionTemplates() {
+  return window['go']['main']['App']['GetAllSessionTemplates']();
 }
 
 export function GetChildActivityFrequency(arg1) {
@@ -246,8 +262,20 @@ export function GetSessionStatistics(arg1, arg2) {
   return window['go']['main']['App']['GetSessionStatistics'](arg1, arg2);
 }
 
+export function GetSessionTemplateByID(arg1) {
+  return window['go']['main']['App']['GetSessionTemplateByID'](arg1);
+}
+
+export function GetSessionTemplatesByCategory(arg1) {
+  return window['go']['main']['App']['GetSessionTemplatesByCategory'](arg1);
+}
+
 export function GetSessionsByChild(arg1) {
   return window['go']['main']['App']['GetSessionsByChild'](arg1);
+}
+
+export function GetTemplateCategories() {
+  return window['go']['main']['App']['GetTemplateCategories']();
 }
 
 export function GetTodaySchedules(arg1) {
@@ -272,6 +300,10 @@ export function LogFlashcardResponse(arg1, arg2, arg3, arg4) {
 
 export function OpenFileInExplorer(arg1) {
   return window['go']['main']['App']['OpenFileInExplorer'](arg1);
+}
+
+export function SearchSessionTemplates(arg1) {
+  return window['go']['main']['App']['SearchSessionTemplates'](arg1);
 }
 
 export function ShowErrorNotification(arg1, arg2) {
@@ -316,6 +348,10 @@ export function UpdateSchedule(arg1, arg2, arg3, arg4, arg5, arg6, arg7) {
 
 export function UpdateSessionSummaryNotes(arg1, arg2) {
   return window['go']['main']['App']['UpdateSessionSummaryNotes'](arg1, arg2);
+}
+
+export function UpdateSessionTemplate(arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14) {
+  return window['go']['main']['App']['UpdateSessionTemplate'](arg1, arg2, arg3, arg4, arg5, arg6, arg7, arg8, arg9, arg10, arg11, arg12, arg13, arg14);
 }
 
 export function ValidateSession(arg1) {

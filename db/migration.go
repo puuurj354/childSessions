@@ -75,6 +75,12 @@ func GetAllMigrations() []MigrationInfo {
 			Up:          migration008Up,
 			Down:        migration008Down,
 		},
+		{
+			Version:     "009_create_session_templates",
+			Description: "Create session templates table with seed data",
+			Up:          migration009Up,
+			Down:        migration009Down,
+		},
 	}
 }
 
@@ -616,6 +622,117 @@ func migration008Down(db *gorm.DB) error {
 
 	// Drop table
 	if err := db.Migrator().DropTable(&model.NoteCategory{}); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Migration 009: Create session templates table
+func migration009Up(db *gorm.DB) error {
+	// Create session_templates table
+	if err := db.AutoMigrate(&model.SessionTemplate{}); err != nil {
+		return err
+	}
+
+	// Add indexes
+	if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_session_templates_category ON session_templates(category)").Error; err != nil {
+		return err
+	}
+	if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_session_templates_is_active ON session_templates(is_active)").Error; err != nil {
+		return err
+	}
+	if err := db.Exec("CREATE INDEX IF NOT EXISTS idx_session_templates_sort_order ON session_templates(sort_order)").Error; err != nil {
+		return err
+	}
+
+	// Insert seed templates
+	sessionTemplates := []model.SessionTemplate{
+		{
+			Name:            "Basic Assessment Session",
+			Description:     "Initial assessment session for new children",
+			Category:        "assessment",
+			DurationMinutes: 90,
+			Objectives:      "Assess current developmental level, identify strengths and areas for improvement, establish baseline measurements",
+			Instructions:    "1. Review child history\n2. Conduct standardized assessments\n3. Observe free play\n4. Document findings\n5. Discuss with parents",
+			Materials:       "Assessment forms, toys for observation, timer, camera (if permitted)",
+			AgeRangeMin:     2,
+			AgeRangeMax:     18,
+			IsActive:        true,
+			CreatedBy:       "system",
+			Tags:            "assessment,initial,baseline",
+			SortOrder:       1,
+			ActivitiesJSON:  `[{"name":"Review History","duration":15,"notes":"Review intake forms and previous reports"},{"name":"Standardized Assessment","duration":45,"notes":"Administer age-appropriate assessments"},{"name":"Free Play Observation","duration":20,"notes":"Observe natural play behaviors"},{"name":"Parent Discussion","duration":10,"notes":"Discuss findings and next steps"}]`,
+			GoalsJSON:       `[{"goal":"Complete comprehensive assessment","target":"100% of assessment items"},{"goal":"Identify 3-5 key intervention areas","target":"Prioritized list"},{"goal":"Establish baseline data","target":"Quantified measurements"}]`,
+			NotesTemplate:   "Assessment Date: {date}\nChild: {child_name}\n\nStrengths Observed:\n- \n\nAreas for Development:\n- \n\nRecommendations:\n- ",
+		},
+		{
+			Name:            "Social Skills Session",
+			Description:     "Structured session focusing on social interaction and communication",
+			Category:        "social",
+			DurationMinutes: 60,
+			Objectives:      "Practice turn-taking, improve eye contact, develop conversational skills, enhance peer interaction",
+			Instructions:    "1. Warm-up activity\n2. Turn-taking games\n3. Role-play scenarios\n4. Group activity\n5. Reflection and feedback",
+			Materials:       "Board games, role-play cards, timer, reward stickers",
+			AgeRangeMin:     4,
+			AgeRangeMax:     16,
+			IsActive:        true,
+			CreatedBy:       "system",
+			Tags:            "social,communication,interaction,peers",
+			SortOrder:       2,
+			ActivitiesJSON:  `[{"name":"Greeting Circle","duration":5,"notes":"Practice greetings and eye contact"},{"name":"Turn-Taking Game","duration":20,"notes":"Board game or card game focusing on waiting"},{"name":"Social Story","duration":15,"notes":"Read and discuss social scenarios"},{"name":"Role Play","duration":15,"notes":"Practice different social situations"},{"name":"Wrap-up Discussion","duration":5,"notes":"Reflect on what was learned"}]`,
+			GoalsJSON:       `[{"goal":"Maintain eye contact","target":"3+ seconds during conversation"},{"goal":"Take turns appropriately","target":"Wait for turn without prompting"},{"goal":"Initiate conversation","target":"Ask 2+ questions during session"}]`,
+			NotesTemplate:   "Social Skills Session - {date}\nChild: {child_name}\n\nEye Contact: /5\nTurn-Taking: /5\nConversation: /5\n\nHighlights:\n- \n\nChallenges:\n- \n\nNext Session Focus:\n- ",
+		},
+		{
+			Name:            "Behavioral Intervention Session",
+			Description:     "Structured session for addressing challenging behaviors",
+			Category:        "behavioral",
+			DurationMinutes: 45,
+			Objectives:      "Reduce challenging behaviors, increase positive behaviors, practice self-regulation strategies",
+			Instructions:    "1. Review behavioral goals\n2. Implement intervention strategies\n3. Practice replacement behaviors\n4. Provide positive reinforcement\n5. Data collection",
+			Materials:       "Visual schedules, timer, reward system materials, data collection sheets",
+			AgeRangeMin:     3,
+			AgeRangeMax:     15,
+			IsActive:        true,
+			CreatedBy:       "system",
+			Tags:            "behavioral,intervention,self-regulation,positive",
+			SortOrder:       3,
+			ActivitiesJSON:  `[{"name":"Goal Review","duration":5,"notes":"Review behavioral targets with child"},{"name":"Skill Practice","duration":20,"notes":"Practice replacement behaviors"},{"name":"Regulation Activity","duration":15,"notes":"Deep breathing, mindfulness, or movement"},{"name":"Reinforcement","duration":5,"notes":"Provide earned rewards and feedback"}]`,
+			GoalsJSON:       `[{"goal":"Reduce target behavior","target":"<3 occurrences per session"},{"goal":"Use replacement behavior","target":"80% of opportunities"},{"goal":"Complete regulation activity","target":"Without resistance"}]`,
+			NotesTemplate:   "Behavioral Session - {date}\nChild: {child_name}\n\nTarget Behaviors Today:\n- Behavior 1: [frequency]\n- Behavior 2: [frequency]\n\nReplacement Behaviors Used:\n- \n\nRegulation Strategies:\n- \n\nRewards Earned:\n- ",
+		},
+	}
+
+	for _, template := range sessionTemplates {
+		// Check if template already exists
+		var existing model.SessionTemplate
+		if err := db.Where("name = ?", template.Name).First(&existing).Error; err == nil {
+			// Already exists, skip
+			continue
+		}
+		if err := db.Create(&template).Error; err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func migration009Down(db *gorm.DB) error {
+	// Drop indexes
+	if err := db.Exec("DROP INDEX IF EXISTS idx_session_templates_category").Error; err != nil {
+		return err
+	}
+	if err := db.Exec("DROP INDEX IF EXISTS idx_session_templates_is_active").Error; err != nil {
+		return err
+	}
+	if err := db.Exec("DROP INDEX IF EXISTS idx_session_templates_sort_order").Error; err != nil {
+		return err
+	}
+
+	// Drop table
+	if err := db.Migrator().DropTable(&model.SessionTemplate{}); err != nil {
 		return err
 	}
 

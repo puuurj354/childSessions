@@ -188,3 +188,28 @@ type Schedule struct {
 	Reminder          bool       `gorm:"default:true"` // Enable reminder notifications
 	ReminderMinutes   int        `gorm:"default:15"`   // Minutes before session
 }
+
+// SessionTemplate represents pre-built session structures
+type SessionTemplate struct {
+	gorm.Model
+
+	Name            string `gorm:"not null;unique"`
+	Description     string
+	Category        string // "behavioral", "speech", "occupational", "general"
+	DurationMinutes int    `gorm:"default:60"`
+	Objectives      string // Main goals/objectives for this template
+	Instructions    string // Step-by-step instructions for therapist
+	Materials       string // Required materials/equipment
+	AgeRangeMin     int    `gorm:"default:2"`  // Minimum age in years
+	AgeRangeMax     int    `gorm:"default:18"` // Maximum age in years
+	IsActive        bool   `gorm:"default:true"`
+	UsageCount      int    `gorm:"default:0"` // Track how often template is used
+	CreatedBy       string // Therapist who created template
+	Tags            string // Comma-separated tags for filtering
+	SortOrder       int    `gorm:"default:0"`
+
+	// Template activities - JSON stored as string for flexibility
+	ActivitiesJSON string // JSON array of activities with durations and notes
+	GoalsJSON      string // JSON array of session goals
+	NotesTemplate  string // Pre-filled notes template with placeholders
+}

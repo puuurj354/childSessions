@@ -20,14 +20,15 @@ import (
 
 // App struct
 type App struct {
-	ctx             context.Context
-	childService    *services.ChildService
-	sessionService  *services.SessionService
-	activityService *services.ActivityService
-	noteService     *services.NoteService
-	rewardService   *services.RewardService
-	scheduleService *services.ScheduleService
-	database        *gorm.DB
+	ctx                    context.Context
+	childService           *services.ChildService
+	sessionService         *services.SessionService
+	activityService        *services.ActivityService
+	noteService            *services.NoteService
+	rewardService          *services.RewardService
+	scheduleService        *services.ScheduleService
+	sessionTemplateService *services.SessionTemplateService
+	database               *gorm.DB
 }
 
 // NewApp creates a new App application struct
@@ -55,6 +56,7 @@ func (a *App) startup(ctx context.Context) {
 	a.noteService = services.NewNoteService(database)
 	a.rewardService = services.NewRewardService(database)
 	a.scheduleService = services.NewScheduleService(database)
+	a.sessionTemplateService = services.NewSessionTemplateService(database)
 }
 
 // Greet returns a greeting for the given name
@@ -1718,6 +1720,101 @@ func (a *App) GetMostPopularActivity() (string, error) {
 	}
 
 	return result.Name, nil
+}
+
+// ===== SESSION TEMPLATE MANAGEMENT =====
+
+// GetAllSessionTemplates retrieves all active session templates
+func (a *App) GetAllSessionTemplates() ([]model.SessionTemplate, error) {
+	return a.sessionTemplateService.GetAllSessionTemplates()
+}
+
+// GetSessionTemplatesByCategory returns templates filtered by category
+func (a *App) GetSessionTemplatesByCategory(category string) ([]model.SessionTemplate, error) {
+	return a.sessionTemplateService.GetSessionTemplatesByCategory(category)
+}
+
+// GetSessionTemplateByID returns a specific session template
+func (a *App) GetSessionTemplateByID(id uint) (*model.SessionTemplate, error) {
+	return a.sessionTemplateService.GetSessionTemplateByID(id)
+}
+
+// CreateSessionTemplate creates a new session template
+func (a *App) CreateSessionTemplate(name, description, category string, durationMinutes int, objectives, instructions, materials, createdBy, tags string, ageRangeMin, ageRangeMax int, activitiesJSON, goalsJSON, notesTemplate string) (*model.SessionTemplate, error) {
+	template, err := a.sessionTemplateService.CreateSessionTemplate(name, description, category, durationMinutes, objectives, instructions, materials, createdBy, tags, ageRangeMin, ageRangeMax, activitiesJSON, goalsJSON, notesTemplate)
+	if err != nil {
+		return nil, err
+	}
+
+	// Emit template created event
+	runtime.EventsEmit(a.ctx, "template_created", map[string]interface{}{
+		"template_id": template.ID,
+		"name":        template.Name,
+		"category":    template.Category,
+		"created_by":  template.CreatedBy,
+	})
+
+	return template, nil
+}
+
+// UpdateSessionTemplate updates an existing session template
+func (a *App) UpdateSessionTemplate(id uint, name, description, category string, durationMinutes int, objectives, instructions, materials, tags string, ageRangeMin, ageRangeMax int, activitiesJSON, goalsJSON, notesTemplate string) error {
+	err := a.sessionTemplateService.UpdateSessionTemplate(id, name, description, category, durationMinutes, objectives, instructions, materials, tags, ageRangeMin, ageRangeMax, activitiesJSON, goalsJSON, notesTemplate)
+	if err != nil {
+		return err
+	}
+
+	// Emit template updated event
+	runtime.EventsEmit(a.ctx, "template_updated", map[string]interface{}{
+		"template_id": id,
+		"name":        name,
+		"category":    category,
+	})
+
+	return nil
+}
+
+// DeleteSessionTemplate soft deletes a session template
+func (a *App) DeleteSessionTemplate(id uint) error {
+	err := a.sessionTemplateService.DeleteSessionTemplate(id)
+	if err != nil {
+		return err
+	}
+
+	// Emit template deleted event
+	runtime.EventsEmit(a.ctx, "template_deleted", map[string]interface{}{
+		"template_id": id,
+	})
+
+	return nil
+}
+
+// CreateSessionFromTemplate creates a new session using template data
+func (a *App) CreateSessionFromTemplate(templateID uint, childID uint, startTime string, therapistName string) (*model.Session, error) {
+	session, err := a.sessionTemplateService.CreateSessionFromTemplate(templateID, childID, startTime, therapistName)
+	if err != nil {
+		return nil, err
+	}
+
+	// Emit session created event
+	runtime.EventsEmit(a.ctx, "session_created_from_template", map[string]interface{}{
+		"session_id":  session.ID,
+		"template_id": templateID,
+		"child_id":    childID,
+		"therapist":   therapistName,
+	})
+
+	return session, nil
+}
+
+// GetTemplateCategories returns unique categories
+func (a *App) GetTemplateCategories() ([]string, error) {
+	return a.sessionTemplateService.GetTemplateCategories()
+}
+
+// SearchSessionTemplates searches templates by name, description, tags
+func (a *App) SearchSessionTemplates(query string) ([]model.SessionTemplate, error) {
+	return a.sessionTemplateService.SearchTemplates(query)
 }
 
 // GetTodaySessionsCount returns count of sessions scheduled/started today

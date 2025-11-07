@@ -14,6 +14,7 @@ import { Settings } from "./pages/Settings"
 import { Toaster } from "./components/ui/sonner"
 import ScheduleManager from "./pages/schedule/ScheduleManager"
 import AnalyticsDashboard from "./pages/analytics/AnalyticsDashboard"
+import { SessionTemplates } from "./pages/templates/SessionTemplates"
 
 function App() {
   const [activePage, setActivePage] = useState("dashboard")
@@ -26,6 +27,8 @@ function App() {
         return <ChildrenList />
       case "sessions":
         return <SessionManager />
+      case "templates":
+        return <SessionTemplates setActivePage={setActivePage} />
       case "activities":
         return <ActivityLibrary />
       case "progress":
@@ -68,6 +71,8 @@ function getPageTitle(page: string): string {
       return "Manajemen Anak"
     case "sessions":
       return "Sesi Terapi"
+    case "templates":
+      return "Template Sesi"
     case "activities":
       return " Aktivitas"
     case "progress":

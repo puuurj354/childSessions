@@ -11,6 +11,7 @@ import {
   TrendingUp,
   BarChart3,
   Clock,
+  BookOpen,
 } from "lucide-react"
 import {
   Sidebar,
@@ -36,6 +37,7 @@ export function AppSidebar({ activePage, setActivePage }: AppSidebarProps) {
     },
     { icon: <Users size={20} />, label: "Anak", value: "children" },
     { icon: <Calendar size={20} />, label: "Sesi", value: "sessions" },
+    { icon: <BookOpen size={20} />, label: "Template", value: "templates" },
     { icon: <Activity size={20} />, label: "Aktivitas", value: "activities" },
     {
       icon: <TrendingUp size={20} />,

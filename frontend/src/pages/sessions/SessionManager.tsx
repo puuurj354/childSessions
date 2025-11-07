@@ -77,6 +77,25 @@ export function SessionManager() {
 
   // Real-time event listeners
   useEffect(() => {
+    // Check if there's template data in sessionStorage from template selection
+    const templateData = sessionStorage.getItem('templateForNewSession')
+    if (templateData) {
+      try {
+        const { childId } = JSON.parse(templateData)
+        if (childId) {
+          setSelectedChildId(childId)
+          toast.info("Template sesi siap digunakan untuk anak yang dipilih")
+        }
+        // Clear after reading
+        sessionStorage.removeItem('templateForNewSession')
+      } catch (err) {
+        console.error("Error parsing template data:", err)
+      }
+    }
+  }, [])
+
+  // Real-time event listeners
+  useEffect(() => {
     loadChildren()
 
     const unsubscribeSessionStarted = EventsOn(
@@ -101,6 +120,19 @@ export function SessionManager() {
         refreshData()
       }
     })
+
+    const unsubscribeSessionCreatedFromTemplate = EventsOn(
+      "session_created_from_template",
+      (data) => {
+        if (data && mountedRef.current) {
+          // Reload active session to get the newly created session
+          if (data.child_id) {
+            checkActiveSession(data.child_id)
+            toast.success("Sesi dari template berhasil dibuat!")
+          }
+        }
+      }
+    )
 
     const unsubscribeSessionUpdate = EventsOn(
       "session_updated",
@@ -154,6 +186,7 @@ export function SessionManager() {
       clearAllTimers()
       if (unsubscribeSessionStarted) unsubscribeSessionStarted()
       if (unsubscribeSessionEnded) unsubscribeSessionEnded()
+      if (unsubscribeSessionCreatedFromTemplate) unsubscribeSessionCreatedFromTemplate()
       if (unsubscribeSessionUpdate) unsubscribeSessionUpdate()
       if (unsubscribeActivityStarted) unsubscribeActivityStarted()
       if (unsubscribeActivityEnded) unsubscribeActivityEnded()
@@ -294,9 +327,12 @@ export function SessionManager() {
   }
 
   const formatDuration = (seconds: number): string => {
-    const hours = Math.floor(seconds / 3600)
-    const minutes = Math.floor((seconds % 3600) / 60)
-    const secs = seconds % 60
+    // Ensure seconds is a valid number
+    const validSeconds = typeof seconds === 'number' && !isNaN(seconds) ? Math.floor(seconds) : 0
+    
+    const hours = Math.floor(validSeconds / 3600)
+    const minutes = Math.floor((validSeconds % 3600) / 60)
+    const secs = validSeconds % 60
 
     if (hours > 0) {
       return `${hours}j ${minutes}m ${secs}d`
@@ -324,7 +360,15 @@ export function SessionManager() {
         const now = new Date()
         const start = toDate(session.StartTime)
         const durationMs = now.getTime() - start.getTime()
-        setSessionDuration(Math.floor(durationMs / 1000))
+        const durationSeconds = Math.floor(durationMs / 1000)
+        
+        // Ensure we have a valid number
+        if (typeof durationSeconds === 'number' && !isNaN(durationSeconds) && durationSeconds >= 0) {
+          setSessionDuration(durationSeconds)
+        } else {
+          console.error("Invalid duration calculated:", durationSeconds, "from", start, "to", now)
+          setSessionDuration(0)
+        }
       }
       setError(null)
       setIsOnline(true)
